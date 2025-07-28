@@ -10,11 +10,12 @@ app.use(cors());
 
 // Example route to test the backend
 app.get('/api/data', (req, res) => {
-    res.json({ message: 'BoomBat hell yeah' });
+    res.json({ message: 'BoomBat hell yeah!' });
 });
 
 
 // -------------- END OF WORKING AREA -----------
+//Launch the server with "npm run dev"
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
