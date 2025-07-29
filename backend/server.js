@@ -48,6 +48,7 @@ app.post('/api/register', async (req, res) => {
     const newUser = {
       username,
       email,
+      points: 1000,  //PUNKTY STARTOWE UZYTKWONIKA PRZY REJESTRACJI
       password: hashedPassword,
       createdAt: new Date()
     };
