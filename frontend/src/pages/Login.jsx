@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 
 function App() {
   const borderRef = useRef(null);
@@ -85,7 +86,10 @@ function App() {
             </form>
 
             <p className="text-xs text-center text-gray-400 mt-6">
-              Don’t have an account? <a href="#" className="text-purple-600 hover:underline">Sign up</a>
+              Don’t have an account?
+              <Link to="/register" className="text-purple-600 hover:underline">
+                Sign up
+              </Link>
             </p>
           </div>
         </div>
