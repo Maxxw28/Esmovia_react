@@ -24,6 +24,12 @@ connectToMongo().catch(console.error);
 
 // ------------- WORKING AREA (TUTAJ PRZYKŁADOWA ROUTA) -------------
 
+// ------ TRASA WYŚWIETLAJĄCA INFORMACJĘ NA / ------
+app.get('/', (req, res) => {
+  res.send("Backend BoomBat jest online!");
+});
+
+
 // Example route to test the backend
 app.get('/api/data', async (req, res) => {
     try {
