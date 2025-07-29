@@ -20,7 +20,7 @@ function App() {
 
 	return (
 		<div className="App">
-			<header className="App-header">
+			<header className="App-header text-3xl">
 				{data ? <p>{data}</p> : <p>Loadin1g...</p>}
 			</header>
 		</div>
