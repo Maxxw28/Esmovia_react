@@ -10,12 +10,12 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "mongod": "^2.0.0",
     "mongodb": "^6.18.0",
     "nodemon": "^3.1.10"
-  }
+  },
+  "description": ""
 }
