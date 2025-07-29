@@ -9,7 +9,7 @@ const port = 5000;
 app.use(express.json());
 app.use(cors());
 
-const mongoUri = 'mongodb://172.24.3.152:27017';
+const mongoUri = 'mongodb://172.24.3.152:27017'; //Tutaj ip zmieniamy kiedy nowy internet
 const dbName = 'BoomBatDb';
 
 let db, usersCollection;
@@ -48,6 +48,7 @@ app.post('/api/register', async (req, res) => {
     const newUser = {
       username,
       email,
+      points: 1000,  //PUNKTY STARTOWE UZYTKWONIKA PRZY REJESTRACJI
       password: hashedPassword,
       createdAt: new Date()
     };
