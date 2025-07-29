@@ -9,7 +9,7 @@ const port = 5000;
 app.use(express.json());
 app.use(cors());
 
-const mongoUri = 'mongodb://localhost:27017';
+const mongoUri = 'mongodb://172.24.3.152:27017';
 const dbName = 'BoomBatDb';
 
 let db, usersCollection;
