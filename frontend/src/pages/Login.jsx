@@ -24,13 +24,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#f6f6f6] font-sans">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="flex justify-between items-center max-w-5xl mx-auto px-6 py-4">
-          <h1 className="text-xl font-semibold text-gray-800">Boom Bat</h1>
-          <span className="text-sm text-gray-500">v1.0.0</span>
-        </div>
-      </header>
 
       {/* Login Section */}
       <main className="flex items-center justify-center pt-24 px-4">
