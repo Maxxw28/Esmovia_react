@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
 import MainLayout from './layouts/MainLayout.jsx';
@@ -12,7 +12,7 @@ import Game1 from './pages/Game1.jsx';
 
 createRoot(document.getElementById('root')).render(
 	<StrictMode>
-		<BrowserRouter>
+		<HashRouter>
 			<Routes>
 				<Route path="/" element={<App />} />
 				<Route path="/dashboard" element={<MainLayout />}>
@@ -23,6 +23,6 @@ createRoot(document.getElementById('root')).render(
 				<Route path="/login" element={<Login />} />
 				<Route path="/register" element={<Register />} />
 			</Routes>
-		</BrowserRouter>
+		</HashRouter>
 	</StrictMode>
 );
