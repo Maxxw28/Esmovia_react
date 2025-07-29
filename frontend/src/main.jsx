@@ -19,12 +19,12 @@ createRoot(document.getElementById('root')).render(
 				<Route path="/" element={<App />} />
 				<Route path="/dashboard" element={<MainLayout />}>
 					<Route index element={<Home />} />
-					<Route path="/dashboard/profile" element={<Dashboard />} />
-					<Route path="/dashboard/earnings">
-						<Route index element={<Selection/>}/>
-						<Route path="/dashboard/earnings/miner" element={<Miner/>}/>
+					<Route path="profile" element={<Dashboard />} />
+					<Route path="earnings">
+						<Route index element={<Selection />} />
+						<Route path="miner" element={<Miner />} />
 					</Route>
-					<Route path="/dashboard/game1" element={<Game1 />} />
+					<Route path="game1" element={<Game1 />} />
 				</Route>
 				<Route path="/login" element={<Login />} />
 				<Route path="/register" element={<Register />} />

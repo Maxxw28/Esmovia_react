@@ -11,10 +11,10 @@ const MainLayout = () => {
 							<Link to="/dashboard">Home</Link>
 						</li>
 						<li>
-							<Link to="/profile">Profile/Dashboard</Link>
+							<Link to="profile">Profile/Dashboard</Link>
 						</li>
 						<li>
-							<Link to="/game1">Game 1</Link>
+							<Link to="game1">Game 1</Link>
 						</li>
 					</ul>
 				</nav>
