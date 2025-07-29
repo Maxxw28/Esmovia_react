@@ -11,11 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-<<<<<<< Updated upstream
     "bcryptjs": "^3.0.2",
-=======
-    "bcrypt": "^6.0.0",
->>>>>>> Stashed changes
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "mongod": "^2.0.0",
