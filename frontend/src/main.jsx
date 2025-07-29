@@ -11,6 +11,7 @@ import Register from './pages/Register.jsx';
 import Game1 from './pages/Game1.jsx';
 import Selection from './pages/earnings/Selection.jsx';
 import Miner from './pages/earnings/Miner.jsx';
+import Roulette from './pages/games/roulette/Roulette.jsx';
 
 createRoot(document.getElementById('root')).render(
 	<StrictMode>
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')).render(
 						<Route path="miner" element={<Miner />} />
 					</Route>
 					<Route path="game1" element={<Game1 />} />
+					<Route path="roulette" element={<Roulette />} />
 				</Route>
 				<Route path="/login" element={<Login />} />
 				<Route path="/register" element={<Register />} />
