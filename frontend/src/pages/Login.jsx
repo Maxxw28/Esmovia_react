@@ -86,7 +86,7 @@ function App() {
             </form>
 
             <p className="text-xs text-center text-gray-400 mt-6">
-              Don’t have an account?
+              Don’t have an account? <br />
               <Link to="/register" className="text-purple-600 hover:underline">
                 Sign up
               </Link>
