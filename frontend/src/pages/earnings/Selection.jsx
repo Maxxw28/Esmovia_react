@@ -1,7 +1,7 @@
 import React from 'react'
-import Clickerph from '/public/images/clicker.png'
-import Minerph from '/public/images/miner.png'
-import Videoph from '/public/images/video.png'
+import Clickerph from '/images/clicker.png'
+import Minerph from '/images/miner.png'
+import Videoph from '/images/video.png'
 import Miner from './Miner.jsx';
 import Clicker from './Clicker.jsx';
 import { Link } from 'react-router-dom';
