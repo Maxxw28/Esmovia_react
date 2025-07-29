@@ -17,17 +17,26 @@ const Roulette = () => {
 
   const handleSpin = () => {
     if (spinning) return;
+
     if (betAmount > balance) {
       setMessage("Za mało środków!");
       return;
     }
 
+    // Losujemy liczbę i kolor
     const rolledNumber = Math.floor(Math.random() * 37);
-    const color = rolledNumber === 0 ? "green" : rolledNumber % 2 === 0 ? "black" : "red";
+    const color =
+      rolledNumber === 0
+        ? "green"
+        : rolledNumber % 2 === 0
+        ? "black"
+        : "red";
 
-    setSpinning(true);
     setResult({ number: rolledNumber, color });
+    setSpinning(true);
+    setMessage("");
 
+    // Po animacji liczymy wynik
     setTimeout(() => {
       const win = color === selectedColor;
       const winAmount = win ? betAmount * (selectedColor === "green" ? 14 : 2) : 0;
@@ -58,7 +67,9 @@ const Roulette = () => {
         <button
           onClick={() => setSelectedColor("red")}
           className={`px-4 py-2 rounded text-white text-sm transition ${
-            selectedColor === "red" ? "bg-red-600" : "bg-red-800 hover:bg-red-700"
+            selectedColor === "red"
+              ? "bg-red-600"
+              : "bg-red-800 hover:bg-red-700"
           }`}
         >
           Czerwony
@@ -66,7 +77,9 @@ const Roulette = () => {
         <button
           onClick={() => setSelectedColor("black")}
           className={`px-4 py-2 rounded text-white text-sm transition ${
-            selectedColor === "black" ? "bg-black" : "bg-gray-700 hover:bg-gray-600"
+            selectedColor === "black"
+              ? "bg-black"
+              : "bg-gray-700 hover:bg-gray-600"
           }`}
         >
           Czarny
@@ -74,7 +87,9 @@ const Roulette = () => {
         <button
           onClick={() => setSelectedColor("green")}
           className={`px-4 py-2 rounded text-white text-sm transition ${
-            selectedColor === "green" ? "bg-green-600" : "bg-green-800 hover:bg-green-700"
+            selectedColor === "green"
+              ? "bg-green-600"
+              : "bg-green-800 hover:bg-green-700"
           }`}
         >
           Zielony
@@ -118,7 +133,9 @@ const Roulette = () => {
 
       {/* Saldo + komunikat */}
       <div className="mt-6 text-center">
-        <p className="text-lg">Saldo: <span className="font-bold">{balance} zł</span></p>
+        <p className="text-lg">
+          Saldo: <span className="font-bold">{balance} zł</span>
+        </p>
         {message && <p className="mt-2">{message}</p>}
       </div>
     </div>

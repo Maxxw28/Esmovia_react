@@ -12,26 +12,32 @@ export default function RouletteStrip({ selectedNumber, spinning, onEnd }) {
   const containerRef = useRef(null);
   const trackRef = useRef(null);
   const [stripItems, setStripItems] = useState([]);
-  const [isSpinning, setIsSpinning] = useState(false);
+  const [animating, setAnimating] = useState(false);
 
   const ITEM_WIDTH = 60;
   const PRE_SPIN_ITEMS = 80;
   const POST_SPIN_ITEMS = 10;
 
-  // Inicjalne losowe tło (zapełnia pasek od razu)
+  // Załaduj losowy pasek na start
   useEffect(() => {
-    const initialStrip = Array.from({ length: PRE_SPIN_ITEMS + POST_SPIN_ITEMS }, () =>
-      numbers[Math.floor(Math.random() * numbers.length)]
+    const initialStrip = Array.from(
+      { length: PRE_SPIN_ITEMS + POST_SPIN_ITEMS },
+      () => numbers[Math.floor(Math.random() * numbers.length)]
     );
     setStripItems(initialStrip);
+    if (trackRef.current) {
+      trackRef.current.style.transition = "none";
+      trackRef.current.style.transform = "translateX(0)";
+    }
   }, []);
 
-  // Obsługa losowania
+  // Uruchom animację gdy spinning jest true i selectedNumber się zmienia
   useEffect(() => {
-    if (!spinning || isSpinning) return;
-    setIsSpinning(true);
+    if (!spinning) return;
 
-    // Tworzymy pełny pasek: losowe + wynik + losowe za wynikiem
+    setAnimating(true);
+
+    // Generujemy pasek: losowe przed + wynik + losowe po
     const prefix = Array.from({ length: PRE_SPIN_ITEMS }, () =>
       numbers[Math.floor(Math.random() * numbers.length)]
     );
@@ -42,7 +48,6 @@ export default function RouletteStrip({ selectedNumber, spinning, onEnd }) {
     const fullStrip = [...prefix, selectedNumber, ...suffix];
     setStripItems(fullStrip);
 
-    // oblicz przesunięcie do wyśrodkowania wyniku
     requestAnimationFrame(() => {
       if (!trackRef.current || !containerRef.current) return;
 
@@ -57,13 +62,14 @@ export default function RouletteStrip({ selectedNumber, spinning, onEnd }) {
       trackRef.current.style.transform = `translateX(-${shift}px)`;
     });
 
+    // Po zakończeniu animacji:
     const timeout = setTimeout(() => {
+      setAnimating(false);
       onEnd && onEnd();
-      setIsSpinning(false);
     }, 2700);
 
     return () => clearTimeout(timeout);
-  }, [spinning, selectedNumber, onEnd, isSpinning]);
+  }, [selectedNumber, spinning, onEnd]);
 
   return (
     <div
