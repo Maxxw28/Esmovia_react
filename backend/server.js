@@ -1,59 +1,67 @@
-// backend/server.js
 const express = require('express');
 const cors = require('cors');
 const { MongoClient } = require('mongodb');
+const bcrypt = require('bcrypt');
 
 const app = express();
 const port = 5000;
+
 app.use(express.json());
 app.use(cors());
 
-// ----------------- KONFIGURACJA MONGO DB ----------------
-const mongoUri = 'mongodb://localhost:27017'; // Adres lokalnego MongoDB
-const dbName = 'BoomBatDb';                   // Nazwa bazy danych
-let db, BoomBatCollection;
+const mongoUri = 'mongodb://172.24.3.152:27017';
+const dbName = 'BoomBatDb';
+
+let db, usersCollection;
 
 async function connectToMongo() {
-    const client = new MongoClient(mongoUri, { useUnifiedTopology: true });
-    await client.connect();
-    db = client.db(dbName);
-    BoomBatCollection = db.collection('BoomBat');
-    console.log('Połączono z MongoDB!');
+  const client = new MongoClient(mongoUri, { useUnifiedTopology: true });
+  await client.connect();
+  db = client.db(dbName);
+  usersCollection = db.collection('users');
+  console.log('Połączono z MongoDB!');
 }
 connectToMongo().catch(console.error);
 
-// ------------- WORKING AREA (TUTAJ PRZYKŁADOWA ROUTA) -------------
+// Endpoint rejestracji
+app.post('/api/register', async (req, res) => {
+  const { username, email, password } = req.body;
 
-// ------ TRASA WYŚWIETLAJĄCA INFORMACJĘ NA / ------
-app.get('/', (req, res) => {
-  res.send("Backend BoomBat jest online!");
-});
+  if (!username || !email || !password) {
+    return res.status(400).json({ error: 'Wszystkie pola są wymagane' });
+  }
 
+  try {
+    // Sprawdź czy użytkownik już istnieje (email lub username)
+    const existingUser = await usersCollection.findOne({
+      $or: [{ email }, { username }]
+    });
 
-// Example route to test the backend
-app.get('/api/data', async (req, res) => {
-    try {
-        // Przykład pobrania danych z kolekcji BoomBat:
-        const items = await BoomBatCollection.find({}).toArray();
-        res.json({ message: 'BoomBat hell yeah!', data: items });
-    } catch (error) {
-        res.status(500).json({ error: "Błąd bazy danych" });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Użytkownik już istnieje' });
     }
-});
 
-// Przykład dodania nowego wpisu do kolekcji BoomBat
-app.post('/api/data', async (req, res) => {
-    try {
-        const obj = req.body; // np. { nazwa: "Nowy rekord" }
-        const result = await BoomBatCollection.insertOne(obj);
-        res.json({ insertedId: result.insertedId });
-    } catch (error) {
-        res.status(500).json({ error: "Błąd przy dodawaniu" });
-    }
-});
+    // Zhashuj hasło
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-// -------------- END OF WORKING AREA ----------------------
+    // Stwórz obiekt użytkownika
+    const newUser = {
+      username,
+      email,
+      password: hashedPassword,
+      createdAt: new Date()
+    };
+
+    // Dodaj do bazy
+    const result = await usersCollection.insertOne(newUser);
+
+    res.status(201).json({ message: 'Użytkownik zarejestrowany', userId: result.insertedId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Błąd serwera' });
+  }
+});
 
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on http://localhost:${port}`);
 });
