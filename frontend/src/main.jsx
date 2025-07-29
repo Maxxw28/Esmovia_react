@@ -9,6 +9,8 @@ import Dashboard from './pages/Dashboard.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import Game1 from './pages/Game1.jsx';
+import Selection from './pages/earnings/Selection.jsx';
+import Miner from './pages/earnings/Miner.jsx';
 
 createRoot(document.getElementById('root')).render(
 	<StrictMode>
@@ -17,8 +19,12 @@ createRoot(document.getElementById('root')).render(
 				<Route path="/" element={<App />} />
 				<Route path="/dashboard" element={<MainLayout />}>
 					<Route index element={<Home />} />
-					<Route path="profile" element={<Dashboard />} />
-					<Route path="game1" element={<Game1 />} />
+					<Route path="/dashboard/profile" element={<Dashboard />} />
+					<Route path="/dashboard/earnings">
+						<Route index element={<Selection/>}/>
+						<Route path="/dashboard/earnings/miner" element={<Miner/>}/>
+					</Route>
+					<Route path="/dashboard/game1" element={<Game1 />} />
 				</Route>
 				<Route path="/login" element={<Login />} />
 				<Route path="/register" element={<Register />} />
