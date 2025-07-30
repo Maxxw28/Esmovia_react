@@ -11,7 +11,6 @@ export default function CrashGame() {
   const [history, setHistory] = useState([]); // historia crashów (mnożników)
   const intervalRef = useRef(null);
 
-  // Aktualizacja mnożnika i obsługa crashu
   useEffect(() => {
     if (gameState === "running") {
       intervalRef.current = setInterval(() => {
@@ -25,7 +24,7 @@ export default function CrashGame() {
               setWinnings(0);
               setCashoutMultiplier(null);
             }
-            return crashPoint; // zatrzymujemy mnożnik na crashPoint
+            return crashPoint;
           }
           return newMult;
         });
@@ -35,7 +34,6 @@ export default function CrashGame() {
     return () => clearInterval(intervalRef.current);
   }, [gameState, crashPoint, cashedOut]);
 
-  // Dodawanie crashPoint do historii **TYLKO RAZ** przy wejściu w stan crashed
   useEffect(() => {
     if (gameState === "crashed" && crashPoint !== null) {
       setHistory((h) => {
@@ -50,7 +48,7 @@ export default function CrashGame() {
 
     if (rand < 0.15) {
       return 1.0;
-    } else if (rand < 0.50) {
+    } else if (rand < 0.5) {
       return parseFloat((1 + Math.random()).toFixed(2));
     } else {
       return parseFloat((2 + Math.random() * 4.5).toFixed(2));
@@ -72,63 +70,30 @@ export default function CrashGame() {
       setCashedOut(true);
       setWinnings(parseFloat((bet * multiplier).toFixed(2)));
       setCashoutMultiplier(multiplier);
-      // mnożnik dalej leci
     }
   };
 
   return (
-    <div
-      style={{
-        maxWidth: 400,
-        margin: "10px auto 20px",
-        padding: 20,
-        textAlign: "center",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
+    <div className="max-w-md mx-auto mt-2 mb-5 p-5 text-center font-sans">
       {/* Historia mnożników */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: 8,
-          marginBottom: 15,
-          flexWrap: "wrap",
-        }}
-      >
+      <div className="flex justify-center gap-2 mb-4 flex-wrap">
         {history.length === 0 && (
-          <div style={{ color: "#888", fontSize: 14 }}>No history yet</div>
+          <div className="text-gray-500 text-sm">No history yet</div>
         )}
         {history.map((val, i) => (
           <div
             key={i}
             title={`Crash at ${val.toFixed(2)}x`}
-            style={{
-              backgroundColor: "#3b82f6",
-              color: "white",
-              borderRadius: 12,
-              padding: "4px 10px",
-              fontSize: 14,
-              fontWeight: "bold",
-              minWidth: 50,
-              userSelect: "none",
-            }}
+            className="bg-blue-500 text-white rounded-2xl px-3 py-1 text-sm font-bold min-w-[50px] select-none"
           >
             {val.toFixed(2)}x
           </div>
         ))}
       </div>
 
-      <h1 style={{ marginBottom: 20 }}>🚀 Crash Game</h1>
+      <h1 className="mb-5 text-2xl font-semibold">🚀 Crash Game</h1>
 
-      <div
-        style={{
-          fontSize: 48,
-          fontWeight: "bold",
-          fontFamily: "monospace",
-          marginBottom: 20,
-        }}
-      >
+      <div className="text-6xl font-bold font-mono mb-5">
         {gameState === "crashed" ? "💥" : multiplier.toFixed(2)}x
       </div>
 
@@ -138,29 +103,15 @@ export default function CrashGame() {
           min="1"
           value={bet}
           onChange={(e) => setBet(Number(e.target.value))}
-          style={{
-            padding: 10,
-            width: "100%",
-            fontSize: 18,
-            marginBottom: 20,
-          }}
+          className="p-2 w-full text-lg mb-5 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       )}
 
-      <div style={{ display: "flex", justifyContent: "center", gap: 10 }}>
+      <div className="flex justify-center gap-2">
         {gameState === "waiting" && (
           <button
             onClick={startGame}
-            style={{
-              backgroundColor: "#3b82f6",
-              color: "white",
-              padding: "10px 20px",
-              borderRadius: 5,
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: 16,
-            }}
+            className="bg-blue-500 text-white px-5 py-2 rounded-md font-bold text-lg hover:bg-blue-600 transition"
           >
             Start
           </button>
@@ -169,34 +120,14 @@ export default function CrashGame() {
         {gameState === "running" && !cashedOut && (
           <button
             onClick={handleCashout}
-            style={{
-              backgroundColor: "#ef4444",
-              color: "white",
-              padding: "10px 20px",
-              borderRadius: 5,
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: 16,
-            }}
+            className="bg-red-500 text-white px-5 py-2 rounded-md font-bold text-lg hover:bg-red-600 transition"
           >
             Cashout
           </button>
         )}
 
         {gameState === "running" && cashedOut && (
-          <div
-            style={{
-              padding: "10px 20px",
-              borderRadius: 5,
-              fontWeight: "bold",
-              fontSize: 16,
-              color: "#10b981",
-              border: "2px solid #10b981",
-              display: "inline-block",
-              minWidth: 130,
-            }}
-          >
+          <div className="px-5 py-2 rounded-md font-bold text-lg text-green-600 border-2 border-green-600 inline-block min-w-[130px]">
             You won {winnings} points
           </div>
         )}
@@ -204,16 +135,7 @@ export default function CrashGame() {
         {gameState === "crashed" && (
           <button
             onClick={() => setGameState("waiting")}
-            style={{
-              backgroundColor: "#10b981",
-              color: "white",
-              padding: "10px 20px",
-              borderRadius: 5,
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: 16,
-            }}
+            className="bg-green-600 text-white px-5 py-2 rounded-md font-bold text-lg hover:bg-green-700 transition"
           >
             Next Round
           </button>
@@ -221,13 +143,13 @@ export default function CrashGame() {
       </div>
 
       {gameState === "crashed" && (
-        <div style={{ marginTop: 20, fontSize: 18 }}>
+        <div className="mt-5 text-lg">
           <p>
             {cashedOut
               ? `✅ You cashed out at ${cashoutMultiplier.toFixed(2)}x`
               : "❌ You crashed!"}
           </p>
-          <p style={{ color: "#555", fontSize: 14 }}>
+          <p className="text-gray-600 text-sm">
             💥 Crash occurred at: {crashPoint.toFixed(2)}x
           </p>
         </div>
