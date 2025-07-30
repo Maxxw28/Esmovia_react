@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // <-- dodaj useNavigate
+import { Link, useNavigate } from 'react-router-dom';
 
 function App() {
   const borderRef = useRef(null);
@@ -7,9 +7,9 @@ function App() {
   const angle = useRef(0);
 
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState(''); // success / error
+  const [messageType, setMessageType] = useState(''); // 'success' / 'error'
 
-  const navigate = useNavigate(); // <-- hook do nawigacji
+  const navigate = useNavigate();
 
   useEffect(() => {
     const animate = () => {
@@ -27,7 +27,6 @@ function App() {
     return () => cancelAnimationFrame(animationRef.current);
   }, []);
 
-  // 🔐 Obsługa logowania
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -42,6 +41,7 @@ function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier, password }),
+        credentials: 'include', // jeśli backend używa cookies/session
       });
 
       const data = await response.json();
@@ -50,15 +50,16 @@ function App() {
         setMessage(`Zalogowano jako: ${data.user.username}`);
         setMessageType('success');
 
-        // Zapisz dane w localStorage (opcjonalnie token jeśli masz)
+        // Zapisz w localStorage całego usera, łącznie z avatarem
         localStorage.setItem('user', JSON.stringify({
           username: data.user.username,
           points: data.user.points,
           email: data.user.email,
           id: data.user.id,
+          avatar: data.user.avatar || '',
         }));
 
-        // Przekieruj na dashboard
+        // Przekieruj do dashboardu
         navigate('/dashboard');
       } else {
         setMessage(data.error || 'Błąd logowania');
@@ -89,7 +90,6 @@ function App() {
               Log in to your account
             </h2>
 
-            {/* 🔐 Formularz logowania */}
             <form className="space-y-4" onSubmit={handleLogin}>
               <div>
                 <label htmlFor="identifier" className="block text-sm text-gray-600 mb-1">
@@ -125,7 +125,6 @@ function App() {
               </button>
             </form>
 
-            {/* 💬 Komunikaty */}
             {message && (
               <p
                 className={`text-sm mt-4 text-center ${
