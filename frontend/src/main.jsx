@@ -13,6 +13,7 @@ import Selection from './pages/earnings/Selection.jsx';
 import Miner from './pages/earnings/Miner.jsx';
 import Roulette from './pages/games/roulette/Roulette.jsx';
 import Clicker from './pages/earnings/Clicker.jsx';
+import Crash from './pages/games/crash/Crash.jsx';
 
 createRoot(document.getElementById('root')).render(
 	<StrictMode>
@@ -29,6 +30,7 @@ createRoot(document.getElementById('root')).render(
 					</Route>
 					<Route path="game1" element={<Game1 />} />
 					<Route path="roulette" element={<Roulette />} />
+					<Route path="crash" element={<Crash />} />
 				</Route>
 				<Route path="/login" element={<Login />} />
 				<Route path="/register" element={<Register />} />
