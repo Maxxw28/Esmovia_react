@@ -23,8 +23,10 @@ async function connectToMongo() {
 }
 connectToMongo().catch(console.error);
 
-// Endpoint rejestracji
-app.post('/api/register', async (req, res) => {
+
+///////////////////////////////////// REJESTRACJA ///////////////////////////////////////////////////////////
+
+app.post('/api/register', async (req, res) => { // Endpoint rejestracji
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
@@ -56,9 +58,10 @@ app.post('/api/register', async (req, res) => {
     // Dodaj do bazy
     const result = await usersCollection.insertOne(newUser);
 
+    console.log(`[REJESTRACJA UDANA] Zarejestrowano użytkownika: ${username} (${email}) | ID: ${result.insertedId}`);
     res.status(201).json({ message: 'Użytkownik zarejestrowany', userId: result.insertedId });
   } catch (error) {
-    console.error(error);
+    console.error(`[REJESTRACJA BŁĄD] ${username} (${email}) | ${error.message}`);
     res.status(500).json({ error: 'Błąd serwera' });
   }
 });
@@ -66,3 +69,5 @@ app.post('/api/register', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+///////////////////////////////////// REJESTRACJA ///////////////////////////////////////////////////////////
