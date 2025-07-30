@@ -37,9 +37,10 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1>Witaj, {user.username}!</h1>
-      <p>Twój email: {user.email}</p>
-      <p>Twoje punkty: {user.points}</p>
+		{/* tutaj przykład użycia zmienncyh sesji, możecie ich używać w całym projekcie aby wyświetlać dane aktualnie zalogowanego użytkownika */}
+      <h1>Username: {user.username}!</h1>
+      <p> Email: {user.email}</p>
+      <p> Points: {user.points}</p>
 
       <button
         onClick={handleLogout}
