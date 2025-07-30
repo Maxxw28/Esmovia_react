@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 const app = express();
 const port = 5000;
 
-app.use(express.json({ limit: '5mb' })); // ⬅️ zwiększony limit dla base64 obrazka
+app.use(express.json({ limit: '5mb' }));
 
 app.use(cors({
   origin: 'http://localhost:5173',
@@ -25,11 +25,23 @@ app.use(session({
   }
 }));
 
-// MongoDB
 const mongoUri = 'mongodb://172.24.3.152:27017';
 const dbName = 'BoomBatDb';
 
 let db, usersCollection;
+
+let crashGame = {
+  gameState: 'waiting',
+  multiplier: 1,
+  crashPoint: null,
+  cashedOut: false,
+  winnings: 0,
+  cashoutMultiplier: null,
+  history: [],
+  bet: 0
+};
+
+let interval = null;
 
 async function connectToMongo() {
   const client = new MongoClient(mongoUri, { useUnifiedTopology: true });
@@ -39,8 +51,6 @@ async function connectToMongo() {
   console.log('Połączono z MongoDB!');
 }
 connectToMongo().catch(console.error);
-
-///////////////////////////////////// REJESTRACJA ///////////////////////////////////////////////////////////
 
 app.post('/api/register', async (req, res) => {
   const { username, email, password } = req.body;
@@ -65,7 +75,7 @@ app.post('/api/register', async (req, res) => {
       email,
       points: 1000,
       password: hashedPassword,
-      avatar: '', // ⬅️ domyślnie brak avatara
+      avatar: '',
       createdAt: new Date()
     };
 
@@ -78,8 +88,6 @@ app.post('/api/register', async (req, res) => {
     res.status(500).json({ error: 'Błąd serwera' });
   }
 });
-
-///////////////////////////////////// LOGOWANIE ///////////////////////////////////////////////////////////
 
 app.post('/api/login', async (req, res) => {
   const { identifier, password } = req.body;
@@ -124,8 +132,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-///////////////////////////////////// POBIERZ ZALOGOWANEGO //////////////////////////////////////////////////
-
 app.get('/api/me', (req, res) => {
   if (req.session.user) {
     res.json({ user: req.session.user });
@@ -134,16 +140,12 @@ app.get('/api/me', (req, res) => {
   }
 });
 
-///////////////////////////////////// WYLOGOWANIE ///////////////////////////////////////////////////////////
-
 app.post('/api/logout', (req, res) => {
   req.session.destroy(() => {
     res.clearCookie('connect.sid');
     res.json({ message: 'Logged out' });
   });
 });
-
-///////////////////////////////////// ZAPIS AVATARA (BASE64) ///////////////////////////////////////////////
 
 app.post('/api/upload-avatar', async (req, res) => {
   const { email, avatar } = req.body;
@@ -172,7 +174,67 @@ app.post('/api/upload-avatar', async (req, res) => {
   }
 });
 
-///////////////////////////////////// START SERWERA ///////////////////////////////////////////////////////
+app.post('/api/crash/start', (req, res) => {
+  if (crashGame.gameState === 'running') {
+    return res.status(400).json({ error: 'Gra już trwa' });
+  }
+
+  const rand = Math.random();
+  let crashPoint;
+
+  if (rand < 0.15) crashPoint = 1.0;
+  else if (rand < 0.5) crashPoint = +(1 + Math.random()).toFixed(2);
+  else crashPoint = +(2 + Math.random() * 4.5).toFixed(2);
+
+  crashGame.crashPoint = crashPoint;
+  crashGame.gameState = 'running';
+  crashGame.multiplier = 1;
+  crashGame.cashedOut = false;
+  crashGame.winnings = 0;
+  crashGame.cashoutMultiplier = null;
+  crashGame.bet = req.body.bet || 10;
+
+  interval = setInterval(() => {
+    crashGame.multiplier = +(crashGame.multiplier * 1.01).toFixed(2);
+    if (crashGame.multiplier >= crashPoint) {
+      clearInterval(interval);
+      crashGame.gameState = 'crashed';
+      if (!crashGame.cashedOut) {
+        crashGame.winnings = 0;
+        crashGame.cashoutMultiplier = null;
+      }
+      crashGame.history.unshift(crashPoint);
+      crashGame.history = crashGame.history.slice(0, 10);
+    }
+  }, 100);
+
+  res.json({ message: 'Gra rozpoczęta', crashPoint });
+});
+
+app.post('/api/crash/cashout', (req, res) => {
+  if (crashGame.gameState !== 'running' || crashGame.cashedOut) {
+    return res.status(400).json({ error: 'Nie można teraz wypłacić' });
+  }
+
+  crashGame.cashedOut = true;
+  crashGame.winnings = +(crashGame.bet * crashGame.multiplier).toFixed(2);
+  crashGame.cashoutMultiplier = crashGame.multiplier;
+
+  res.json({ message: 'Wypłacono', winnings: crashGame.winnings });
+});
+
+app.get('/api/crash/state', (req, res) => {
+  res.json({
+    gameState: crashGame.gameState,
+    multiplier: crashGame.multiplier,
+    crashPoint: crashGame.crashPoint,
+    cashedOut: crashGame.cashedOut,
+    winnings: crashGame.winnings,
+    cashoutMultiplier: crashGame.cashoutMultiplier,
+    history: crashGame.history,
+    bet: crashGame.bet
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

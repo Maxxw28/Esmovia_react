@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import axios from "axios";
 
 export default function CrashGame() {
   const [gameState, setGameState] = useState("waiting"); // waiting | running | crashed
@@ -8,7 +9,7 @@ export default function CrashGame() {
   const [cashedOut, setCashedOut] = useState(false);
   const [winnings, setWinnings] = useState(0);
   const [cashoutMultiplier, setCashoutMultiplier] = useState(null);
-  const [history, setHistory] = useState([]); // historia crashów (mnożników)
+  const [history, setHistory] = useState([]);
   const intervalRef = useRef(null);
 
   useEffect(() => {
@@ -43,33 +44,28 @@ export default function CrashGame() {
     }
   }, [gameState, crashPoint]);
 
-  const generateCrashPoint = () => {
-    const rand = Math.random();
-
-    if (rand < 0.15) {
-      return 1.0;
-    } else if (rand < 0.5) {
-      return parseFloat((1 + Math.random()).toFixed(2));
-    } else {
-      return parseFloat((2 + Math.random() * 4.5).toFixed(2));
+  const startGame = async () => {
+    try {
+      const res = await axios.post("http://localhost:5000/api/crash/start", { bet }, { withCredentials: true });
+      setCrashPoint(res.data.crashPoint);
+      setGameState("running");
+      setMultiplier(1);
+      setCashedOut(false);
+      setWinnings(0);
+      setCashoutMultiplier(null);
+    } catch (err) {
+      console.error("Start game error:", err);
     }
   };
 
-  const startGame = () => {
-    const generatedCrash = generateCrashPoint();
-    setCrashPoint(generatedCrash);
-    setGameState("running");
-    setMultiplier(1);
-    setCashedOut(false);
-    setWinnings(0);
-    setCashoutMultiplier(null);
-  };
-
-  const handleCashout = () => {
-    if (gameState === "running" && !cashedOut) {
+  const handleCashout = async () => {
+    try {
+      const res = await axios.post("http://localhost:5000/api/crash/cashout", {}, { withCredentials: true });
       setCashedOut(true);
-      setWinnings(parseFloat((bet * multiplier).toFixed(2)));
-      setCashoutMultiplier(multiplier);
+      setWinnings(res.data.winnings);
+      setCashoutMultiplier(res.data.cashoutMultiplier);
+    } catch (err) {
+      console.error("Cashout error:", err);
     }
   };
 
