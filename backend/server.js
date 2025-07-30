@@ -1,27 +1,27 @@
 const express = require('express');
 const cors = require('cors');
-const session = require('express-session'); // 🆕 dodaj
+const session = require('express-session');
 const { MongoClient } = require('mongodb');
 const bcrypt = require('bcrypt');
 
 const app = express();
 const port = 5000;
 
-app.use(express.json());
+app.use(express.json({ limit: '5mb' })); // ⬅️ zwiększony limit dla base64 obrazka
+
 app.use(cors({
   origin: 'http://localhost:5173',
-  credentials: true // 🆕 pozwala na przesyłanie ciastek
+  credentials: true
 }));
 
-// 🆕 KONFIGURACJA SESJI
 app.use(session({
-  secret: 'tajny_klucz_sesji', // 🔐 w produkcji przechowuj jako zmienną środowiskową
+  secret: 'tajny_klucz_sesji',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // true tylko w HTTPS
+    secure: false,
     httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24 // 1 dzień
+    maxAge: 1000 * 60 * 60 * 24
   }
 }));
 
@@ -65,6 +65,7 @@ app.post('/api/register', async (req, res) => {
       email,
       points: 1000,
       password: hashedPassword,
+      avatar: '', // ⬅️ domyślnie brak avatara
       createdAt: new Date()
     };
 
@@ -104,21 +105,18 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email/username or password.' });
     }
 
-    // 🆕 ZAPISZ DANE DO SESJI
     req.session.user = {
       username: user.username,
-      points: user.points
+      email: user.email,
+      points: user.points,
+      avatar: user.avatar || ''
     };
 
     console.log(`[LOGOWANIE UDANE] ${user.username}`);
 
     res.status(200).json({
       message: 'Login successful.',
-      user: {
-        username: user.username,
-        email: user.email,
-        points: user.points
-      }
+      user: req.session.user
     });
   } catch (error) {
     console.error(`[LOGOWANIE BŁĄD] ${error.message}`);
@@ -126,23 +124,52 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-///////////////////////////////////// SESJA: POBIERZ ZALOGOWANEGO UŻYTKOWNIKA ////////////////////////////
+///////////////////////////////////// POBIERZ ZALOGOWANEGO //////////////////////////////////////////////////
 
 app.get('/api/me', (req, res) => {
   if (req.session.user) {
     res.json({ user: req.session.user });
   } else {
-    res.status(401).json({ error: 'Login error' });
+    res.status(401).json({ error: 'Brak aktywnej sesji' });
   }
 });
 
-///////////////////////////////////// WYLOGOWANIE ///////////////////////////////// <----- DODAĆ PÓŹNIEJ
+///////////////////////////////////// WYLOGOWANIE ///////////////////////////////////////////////////////////
 
-app.post('/api/logout', (req, res) => { 
+app.post('/api/logout', (req, res) => {
   req.session.destroy(() => {
     res.clearCookie('connect.sid');
     res.json({ message: 'Logged out' });
   });
+});
+
+///////////////////////////////////// ZAPIS AVATARA (BASE64) ///////////////////////////////////////////////
+
+app.post('/api/upload-avatar', async (req, res) => {
+  const { email, avatar } = req.body;
+
+  if (!email || !avatar) {
+    return res.status(400).json({ error: 'Brakuje emaila lub avatara.' });
+  }
+
+  try {
+    const result = await usersCollection.updateOne(
+      { email },
+      { $set: { avatar } }
+    );
+
+    if (result.modifiedCount === 1) {
+      if (req.session.user) {
+        req.session.user.avatar = avatar;
+      }
+      res.json({ message: 'Avatar zapisany.' });
+    } else {
+      res.status(404).json({ error: 'Użytkownik nie znaleziony.' });
+    }
+  } catch (error) {
+    console.error('Błąd przy zapisie avatara:', error);
+    res.status(500).json({ error: 'Błąd serwera.' });
+  }
 });
 
 ///////////////////////////////////// START SERWERA ///////////////////////////////////////////////////////

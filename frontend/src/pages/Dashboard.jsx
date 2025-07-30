@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -10,7 +12,7 @@ export default function Dashboard() {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      navigate('/login'); // jeśli nie ma usera w localStorage, idź do logowania
+      navigate('/login');
     }
   }, [navigate]);
 
@@ -21,7 +23,7 @@ export default function Dashboard() {
         credentials: 'include',
       });
       if (res.ok) {
-        localStorage.removeItem('user'); // wyczyść usera
+        localStorage.removeItem('user');
         navigate('/login');
       } else {
         console.error('Wylogowanie nie powiodło się');
@@ -31,16 +33,66 @@ export default function Dashboard() {
     }
   };
 
-  if (!user) {
-    return <p>Ładowanie danych użytkownika...</p>;
-  }
+  const handleAvatarUpload = async () => {
+    if (!avatarFile || !user) return;
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      setUploading(true);
+      try {
+        const res = await fetch('http://localhost:5000/api/upload-avatar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: user.email,
+            avatar: reader.result, // base64
+          }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          const updatedUser = { ...user, avatar: reader.result };
+          setUser(updatedUser);
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        } else {
+          console.error('Błąd:', data.error);
+        }
+      } catch (error) {
+        console.error('Błąd podczas wysyłania avatara:', error);
+      } finally {
+        setUploading(false);
+      }
+    };
+
+    reader.readAsDataURL(avatarFile);
+  };
+
+  if (!user) return <p>Ładowanie danych użytkownika...</p>;
 
   return (
-    <div>
-		{/* tutaj przykład użycia zmienncyh sesji, możecie ich używać w całym projekcie aby wyświetlać dane aktualnie zalogowanego użytkownika */}
-      <h1>Username: {user.username}!</h1>
-      <p> Email: {user.email}</p>
-      <p> Points: {user.points}</p>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-2">Witaj, {user.username}!</h1>
+      <p>Email: {user.email}</p>
+      <p>Punkty: {user.points}</p>
+
+      {user.avatar && (
+        <img src={user.avatar} alt="Avatar" className="w-24 h-24 rounded-full my-4" />
+      )}
+
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setAvatarFile(e.target.files[0])}
+        className="my-2"
+      />
+      <button
+        onClick={handleAvatarUpload}
+        disabled={uploading}
+        className="bg-blue-600 text-white px-4 py-2 rounded mr-2"
+      >
+        {uploading ? 'Wysyłanie...' : 'Zapisz avatar'}
+      </button>
 
       <button
         onClick={handleLogout}
