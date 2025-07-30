@@ -1,0 +1,161 @@
+openapi: 3.0.0
+info:
+  title: Boombat User Service API
+  version: "1.0.0"
+  description: API for user authentication, registration, session management and avatar upload for Boombat application.
+
+servers:
+  - url: http://localhost:5000
+
+paths:
+  /api/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username:
+                  type: string
+                  example: johndoe
+                email:
+                  type: string
+                  example: johndoe@example.com
+                password:
+                  type: string
+                  example: examplepassword
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  userId:
+                    type: string
+        "400":
+          description: All fields required or User already exists
+        "500":
+          description: Server error
+
+  /api/login:
+    post:
+      summary: User login (by email or username + password)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [identifier, password]
+              properties:
+                identifier:
+                  type: string
+                  description: Email or username
+                  example: johndoe
+                password:
+                  type: string
+                  example: examplepassword
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/UserPublic'
+        "400":
+          description: Email/username and password are required
+        "401":
+          description: Invalid credentials
+        "500":
+          description: Server error
+
+  /api/me:
+    get:
+      summary: Get current logged-in user
+      responses:
+        "200":
+          description: User from active session
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserPublic'
+        "401":
+          description: No active session
+
+  /api/logout:
+    post:
+      summary: Log out current user
+      responses:
+        "200":
+          description: User logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "500":
+          description: Server error
+
+  /api/upload-avatar:
+    post:
+      summary: Upload user avatar (base64)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, avatar]
+              properties:
+                email:
+                  type: string
+                  example: johndoe@example.com
+                avatar:
+                  type: string
+                  description: Avatar image in base64
+                  example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+      responses:
+        "200":
+          description: Avatar saved
+        "400":
+          description: Missing email or avatar
+        "404":
+          description: User not found
+        "500":
+          description: Server error
+
+components:
+  schemas:
+    UserPublic:
+      type: object
+      properties:
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          example: johndoe@example.com
+        points:
+          type: integer
+          example: 1000
+        avatar:
+          type: string
+          example: data:image/png;base64,iVBOR...
