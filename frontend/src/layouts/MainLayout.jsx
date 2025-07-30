@@ -4,14 +4,11 @@ import { User, Gamepad2, Moon, Sun } from 'lucide-react';
 import Logo from '/images/boombat.png';
 import Coin from '/images/batcoin.png';
 import '../index.css';
+import { useTheme } from '../utils/ThemeContext';
 
 const MainLayout = () => {
-	const [darkMode, setDarkMode] = useState(false);
+	const { theme, toggleTheme } = useTheme();
 	const [user, setUser] = useState(null);
-
-	useEffect(() => {
-		document.documentElement.classList.toggle('dark', darkMode);
-	}, [darkMode]);
 
 	useEffect(() => {
 		const storedUser = localStorage.getItem('user');
@@ -21,43 +18,58 @@ const MainLayout = () => {
 	}, []);
 
 	return (
-		<div className="bg-white dark:bg-gray-900 min-h-screen transition-colors">
-			<header className="w-full flex items-center justify-between px-6 py-4 shadow bg-white dark:bg-gray-800 transition-colors">
+		<div className="min-h-screen transition-colors bg-white dark:bg-gray-900">
+			<header className="flex items-center justify-between w-full px-6 py-4 transition-colors bg-white shadow dark:bg-gray-800">
 				{/* Lewa strona: logo + napis */}
 				<Link to="/dashboard" className="flex items-center gap-2">
-					<img src={Logo} alt="Boom Bat Logo" className="h-12 w-auto" />
-					<span className="text-xl font-bold text-gray-800 dark:text-white">Boom Bat</span>
+					<img src={Logo} alt="Boom Bat Logo" className="w-auto h-12" />
+					<span className="text-xl font-bold text-gray-800 dark:text-white">
+						Boom Bat
+					</span>
 				</Link>
 
 				{/* Prawa strona */}
 				<div className="flex items-center gap-4">
 					{/* Dark mode toggle */}
 					<button
-						onClick={() => setDarkMode(!darkMode)}
-						className="relative w-16 h-8 bg-gray-300 dark:bg-gray-600 rounded-full p-1 transition-colors"
+						onClick={toggleTheme}
+						className="relative w-16 h-8 p-1 transition-colors bg-gray-300 rounded-full dark:bg-gray-600"
 					>
 						<span
-							className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transform transition-transform ${darkMode ? 'translate-x-8' : ''}`}
+							className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transform transition-transform ${
+								theme === 'dark' ? 'translate-x-8' : ''
+							}`}
 						></span>
-						<span className="absolute top-1 left-1 w-6 h-6 flex items-center justify-center">
-							<Sun className={`w-4 h-4 text-yellow-500 transition-opacity ${darkMode ? 'opacity-0' : 'opacity-100'}`} />
+						<span className="absolute flex items-center justify-center w-6 h-6 top-1 left-1">
+							<Sun
+								className={`w-4 h-4 text-yellow-500 transition-opacity ${
+									theme === 'dark' ? 'opacity-0' : 'opacity-100'
+								}`}
+							/>
 						</span>
-						<span className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center">
-							<Moon className={`w-4 h-4 text-gray-800 dark:text-gray-200 transition-opacity ${darkMode ? 'opacity-100' : 'opacity-0'}`} />
+						<span className="absolute flex items-center justify-center w-6 h-6 top-1 right-1">
+							<Moon
+								className={`w-4 h-4 text-gray-800 dark:text-gray-200 transition-opacity ${
+									theme === 'dark' ? 'opacity-100' : 'opacity-0'
+								}`}
+							/>
 						</span>
 					</button>
 
 					{/* Games */}
 					<Link
 						to="/dashboard/game1"
-						className="text-gray-600 dark:text-gray-300 hover:text-blue-600 transition text-sm font-medium flex items-center gap-1"
+						className="flex items-center gap-1 text-sm font-medium text-gray-600 transition dark:text-gray-300 hover:text-blue-600"
 					>
 						<Gamepad2 className="w-12 h-12" />
 						Games
 					</Link>
 
 					{/* Profile */}
-					<Link to="/dashboard/profile" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
+					<Link
+						to="/dashboard/profile"
+						className="text-gray-600 transition dark:text-gray-300 hover:text-blue-600"
+					>
 						<User className="w-12 h-12" />
 					</Link>
 
@@ -68,12 +80,16 @@ const MainLayout = () => {
 
 					{/* Ikona monet */}
 					<div>
-						<img src={Coin} alt="Boom Bat Logo" className="h-14 w-auto flex justify-center" />
+						<img
+							src={Coin}
+							alt="Boom Bat Logo"
+							className="flex justify-center w-auto h-14"
+						/>
 					</div>
 				</div>
 			</header>
 
-			<main className="p-6 text-gray-900 dark:text-white transition-colors">
+			<main className="p-6 text-gray-900 transition-colors dark:text-white">
 				<Outlet />
 			</main>
 		</div>
