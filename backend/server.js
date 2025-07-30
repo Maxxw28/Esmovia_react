@@ -71,3 +71,53 @@ app.listen(port, () => {
 });
 
 ///////////////////////////////////// REJESTRACJA ///////////////////////////////////////////////////////////
+
+///////////////////////////////////// LOGOWANIE ///////////////////////////////////////////////////////////
+
+app.post('/api/login', async (req, res) => {
+  const { identifier, password } = req.body; // ZAMIANA email → identifier
+
+  console.log(`[LOGOWANIE] Próba logowania: ${identifier}`);
+
+  if (!identifier || !password) {
+    console.log(`[LOGOWANIE NIEUDANE] Brak identyfikatora lub hasła`);
+    return res.status(400).json({ error: 'Email/nazwa użytkownika i hasło są wymagane' });
+  }
+
+  try {
+    // Szukamy użytkownika po emailu LUB nazwie użytkownika
+    const user = await usersCollection.findOne({
+      $or: [{ email: identifier }, { username: identifier }]
+    });
+
+    if (!user) {
+      console.log(`[LOGOWANIE NIEUDANE] Użytkownik nie istnieje: ${identifier}`);
+      return res.status(401).json({ error: 'Nieprawidłowy email/username lub hasło' });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
+      console.log(`[LOGOWANIE NIEUDANE] Błędne hasło dla: ${identifier}`);
+      return res.status(401).json({ error: 'Nieprawidłowy email/username lub hasło' });
+    }
+
+    console.log(`[LOGOWANIE UDANE] Zalogowano użytkownika: ${user.username} (${user.email})`);
+
+    res.status(200).json({
+      message: 'Zalogowano pomyślnie',
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        points: user.points,
+      },
+    });
+  } catch (error) {
+    console.error(`[LOGOWANIE BŁĄD] ${identifier} | ${error.message}`);
+    res.status(500).json({ error: 'Błąd serwera' });
+  }
+});
+
+///////////////////////////////////// LOGOWANIE ///////////////////////////////////////////////////////////
+
