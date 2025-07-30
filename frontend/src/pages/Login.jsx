@@ -1,10 +1,15 @@
-import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // <-- dodaj useNavigate
 
 function App() {
   const borderRef = useRef(null);
   const animationRef = useRef(null);
   const angle = useRef(0);
+
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState(''); // success / error
+
+  const navigate = useNavigate(); // <-- hook do nawigacji
 
   useEffect(() => {
     const animate = () => {
@@ -22,13 +27,54 @@ function App() {
     return () => cancelAnimationFrame(animationRef.current);
   }, []);
 
+  // 🔐 Obsługa logowania
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    const identifier = e.target.identifier.value;
+    const password = e.target.password.value;
+
+    setMessage('');
+    setMessageType('');
+
+    try {
+      const response = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(`Zalogowano jako: ${data.user.username}`);
+        setMessageType('success');
+
+        // Zapisz dane w localStorage (opcjonalnie token jeśli masz)
+        localStorage.setItem('user', JSON.stringify({
+          username: data.user.username,
+          points: data.user.points,
+          email: data.user.email,
+          id: data.user.id,
+        }));
+
+        // Przekieruj na dashboard
+        navigate('/dashboard');
+      } else {
+        setMessage(data.error || 'Błąd logowania');
+        setMessageType('error');
+      }
+    } catch (err) {
+      console.error('Błąd połączenia:', err);
+      setMessage('Błąd połączenia z serwerem');
+      setMessageType('error');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f6f6f6] font-sans">
-
-      {/* Login Section */}
       <main className="flex items-center justify-center pt-24 px-4">
         <div className="relative w-full max-w-md rounded-xl p-[2px]">
-          {/* Animated Border */}
           <div
             ref={borderRef}
             className="absolute -inset-1 rounded-xl"
@@ -38,20 +84,21 @@ function App() {
             }}
           ></div>
 
-          {/* Content */}
           <div className="relative bg-white p-7 sm:p-10 rounded-xl shadow-md">
             <h2 className="text-xl font-medium text-gray-800 mb-5">
               Log in to your account
             </h2>
-            <form className="space-y-4">
+
+            {/* 🔐 Formularz logowania */}
+            <form className="space-y-4" onSubmit={handleLogin}>
               <div>
-                <label htmlFor="email" className="block text-sm text-gray-600 mb-1">
-                  Email address
+                <label htmlFor="identifier" className="block text-sm text-gray-600 mb-1">
+                  Email or Username
                 </label>
                 <input
-                  type="email"
-                  id="email"
-                  name="email"
+                  type="text"
+                  id="identifier"
+                  name="identifier"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
                   required
                 />
@@ -77,6 +124,17 @@ function App() {
                 Log In
               </button>
             </form>
+
+            {/* 💬 Komunikaty */}
+            {message && (
+              <p
+                className={`text-sm mt-4 text-center ${
+                  messageType === 'success' ? 'text-green-600' : 'text-red-500'
+                }`}
+              >
+                {message}
+              </p>
+            )}
 
             <p className="text-xs text-center text-gray-400 mt-6">
               Don’t have an account? <br />
