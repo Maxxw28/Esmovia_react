@@ -62,7 +62,6 @@ const MainLayout = () => {
 						className="flex items-center gap-1 text-sm font-medium text-gray-600 transition dark:text-gray-300 hover:text-blue-600"
 					>
 						<Gamepad2 className="w-12 h-12" />
-						Games
 					</Link>
 
 					{/* Profile */}
@@ -70,21 +69,37 @@ const MainLayout = () => {
 						to="/dashboard/profile"
 						className="text-gray-600 transition dark:text-gray-300 hover:text-blue-600"
 					>
-						<User className="w-12 h-12" />
+						{user?.avatar ? (
+							<img
+								src={user.avatar}
+								alt="Avatar"
+								className="object-cover w-12 h-12 border-2 border-gray-400 rounded-full dark:border-white"
+							/>
+						) : (
+							<User className="w-12 h-12" />
+						)}
 					</Link>
+					<div className="flex justify-center bg-purple-200 direction-row rounded-3xl w-25">
+						{/* Punkty użytkownika */}
+						<span className="text-xl font-bold text-gray-800 dark:text-white">
+							{user?.points ?? 0}
+						</span>
 
-					{/* Punkty użytkownika */}
-					<span className="text-xl font-bold text-gray-800 dark:text-white">
-						{user?.points ?? 0}
-					</span>
-
-					{/* Ikona monet */}
-					<div>
-						<img
-							src={Coin}
-							alt="Boom Bat Logo"
-							className="flex justify-center w-auto h-14"
-						/>
+						{/* Ikona monet */}
+						<div>
+							<Link to="/dashboard/earnings">
+								<img
+									src={Coin}
+									alt="Boom Bat Logo"
+									className="flex justify-center w-auto h-8"
+								/>
+							</Link>
+						</div>
+						<div>
+							<Link to="/dashboard/earnings">
+								<span className="text-xl font-bold">+</span>
+							</Link>
+						</div>
 					</div>
 				</div>
 			</header>
