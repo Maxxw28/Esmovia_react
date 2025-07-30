@@ -4,6 +4,7 @@ import { User, Gamepad2, Moon, Sun } from 'lucide-react';
 import Logo from '/images/boombat.png';
 import Coin from '/images/batcoin.png';
 import '../index.css';
+import Crash from '../pages/games/crash/crash.jsx';
 
 const MainLayout = () => {
 	const [darkMode, setDarkMode] = useState(false);
@@ -74,7 +75,7 @@ const MainLayout = () => {
 			</header>
 
 			<main className="p-6 text-gray-900 dark:text-white transition-colors">
-				<Outlet />
+				<Crash />
 			</main>
 		</div>
 	);
