@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // <-- dodaj useNavigate
 
 function App() {
   const borderRef = useRef(null);
@@ -8,6 +8,8 @@ function App() {
 
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // success / error
+
+  const navigate = useNavigate(); // <-- hook do nawigacji
 
   useEffect(() => {
     const animate = () => {
@@ -47,7 +49,17 @@ function App() {
       if (response.ok) {
         setMessage(`Zalogowano jako: ${data.user.username}`);
         setMessageType('success');
-        // Można dodać localStorage, redirect itp.
+
+        // Zapisz dane w localStorage (opcjonalnie token jeśli masz)
+        localStorage.setItem('user', JSON.stringify({
+          username: data.user.username,
+          points: data.user.points,
+          email: data.user.email,
+          id: data.user.id,
+        }));
+
+        // Przekieruj na dashboard
+        navigate('/dashboard');
       } else {
         setMessage(data.error || 'Błąd logowania');
         setMessageType('error');
