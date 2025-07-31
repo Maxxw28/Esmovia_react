@@ -63,6 +63,11 @@ const Roulette = () => {
   const [wins, setWins] = useState({}); // { betKey: liczba punktów/null }
   const [lastResults, setLastResults] = useState(null); // <-- nowy stan na boxy wyników
 
+  // Dodaj uniwersalny styl tekstu z czarnym obwodem
+  const textShadowStyle = {
+    textShadow: "0 0 2px #000, 0 0 1px #000, 1px 1px 1px #000"
+  };
+
   // Obsługa zmiany checkboxa i kwoty
   const handleCheck = (key, checked) => {
     setBets((prev) => ({
@@ -283,7 +288,7 @@ const Roulette = () => {
       }`}
       aria-pressed={checked}
       tabIndex={0}
-      style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
+      style={{ fontFamily: "'Montserrat', Arial, sans-serif" }} // <-- USUNIĘTO ...textShadowStyle
     >
       {label}
     </button>
@@ -311,8 +316,13 @@ const Roulette = () => {
   const colWidth = "min-w-[140px] max-w-[180px] w-full";
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center pt-10 px-4" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
-      <h1 className="text-3xl font-bold mb-6">Roulette</h1>
+    <div className="min-h-screen text-white flex flex-col items-center pt-10 px-4" style={{ fontFamily: "'Montserrat', Arial, sans-serif", background: "transparent" }}>
+      <h1
+        className="text-3xl font-bold mb-6"
+        style={textShadowStyle}
+      >
+        Roulette
+      </h1>
 
       <RouletteStrip selectedNumber={result?.number ?? 0} spinning={spinning} onEnd={() => {}} />
 
@@ -324,25 +334,26 @@ const Roulette = () => {
         }}
         disabled={spinning}
         className="mt-6 bg-green-600 hover:bg-green-700 text-white px-10 py-2 rounded text-lg transition w-64"
-        style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
+        style={{ fontFamily: "'Montserrat', Arial, sans-serif", ...textShadowStyle }}
       >
         {spinning ? "Spinning..." : "Spin"}
       </button>
 
       {/* Player balance */}
-      <div className="mt-4 mb-2 text-2xl font-bold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
+      <div className="mt-4 mb-2 text-2xl font-bold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif", ...textShadowStyle }}>
         Balance: <span className="font-bold">{balance} zł</span>
       </div>
 
       {/* Total bet */}
-      <div className="mb-2 text-lg font-semibold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
+      <div className="mb-2 text-lg font-semibold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif", ...textShadowStyle }}>
         Total bet: <span className="font-bold">{totalBet()} zł</span>
       </div>
 
       {/* Total win */}
-      <div className="mb-4 text-lg font-semibold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
+      <div className="mb-4 text-lg font-semibold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif", ...textShadowStyle }}>
         Total win:{" "}
         <span className="font-bold" style={{
+          ...textShadowStyle,
           color:
             lastResults &&
             (
@@ -398,9 +409,9 @@ const Roulette = () => {
       <div className="w-full max-w-md mt-8 flex flex-col gap-2">
         <div className="w-full">
           <div className="grid grid-cols-3 gap-3 mb-2">
-            <div className={`text-center font-semibold ${colWidth}`}>Bet</div>
-            <div className={`text-center font-semibold ${colWidth}`}>Amount</div>
-            <div className={`text-center font-semibold ${colWidth}`}>Result</div>
+            <div className={`text-center font-semibold ${colWidth}`} style={textShadowStyle}>Bet</div>
+            <div className={`text-center font-semibold ${colWidth}`} style={textShadowStyle}>Amount</div>
+            <div className={`text-center font-semibold ${colWidth}`} style={textShadowStyle}>Result</div>
           </div>
           {/* Kolory */}
           {["red", "black", "green"].map((key) => (
@@ -439,7 +450,7 @@ const Roulette = () => {
                   pattern="[0-9]*"
                   className="w-full px-3 py-2 rounded-lg text-black bg-white text-lg border border-gray-300 focus:outline-none"
                   placeholder="Amount"
-                  style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
+                  style={{ fontFamily: "'Montserrat', Arial, sans-serif" }} // <-- USUNIĘTO ...textShadowStyle
                 />
               </div>
               <div className={colWidth}>
@@ -491,7 +502,7 @@ const Roulette = () => {
                   pattern="[0-9]*"
                   className="w-full px-3 py-2 rounded-lg text-black bg-white text-lg border border-gray-300 focus:outline-none"
                   placeholder="Amount"
-                  style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
+                  style={{ fontFamily: "'Montserrat', Arial, sans-serif" }} // <-- USUNIĘTO ...textShadowStyle
                 />
               </div>
               <div className={colWidth}>
@@ -543,7 +554,7 @@ const Roulette = () => {
                   pattern="[0-9]*"
                   className="w-full px-3 py-2 rounded-lg text-black bg-white text-lg border border-gray-300 focus:outline-none"
                   placeholder="Amount"
-                  style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
+                  style={{ fontFamily: "'Montserrat', Arial, sans-serif" }} // <-- USUNIĘTO ...textShadowStyle
                 />
               </div>
               <div className={colWidth}>
@@ -559,7 +570,9 @@ const Roulette = () => {
 
       {/* Konkretne liczby */}
       <div className="mt-6 w-full max-w-3xl">
-        <p className="text-sm mb-2 text-center">Choose numbers and amounts (x35):</p>
+        <p className="text-sm mb-2 text-center" style={textShadowStyle}>
+          Choose numbers and amounts (x35):
+        </p>
         <div className="grid grid-cols-4 gap-6">
           {rouletteOrder.filter((num) => num !== 0).map((num) => {
             // Ustal kolor tła jak na ruletce
