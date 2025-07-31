@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 const app = express();
 const port = 5000;
 
-app.use(express.json({ limit: '5mb' })); // ⬅️ zwiększony limit dla base64 obrazka
+app.use(express.json({ limit: '5mb' }));
 
 app.use(cors({
   origin: 'http://localhost:5173',
@@ -25,11 +25,23 @@ app.use(session({
   }
 }));
 
-// MongoDB
 const mongoUri = 'mongodb://172.24.3.152:27017';
 const dbName = 'BoomBatDb';
 
 let db, usersCollection;
+
+let crashGame = {
+  gameState: 'waiting',
+  multiplier: 1,
+  crashPoint: null,
+  cashedOut: false,
+  winnings: 0,
+  cashoutMultiplier: null,
+  history: [],
+  bet: 0
+};
+
+let interval = null;
 
 async function connectToMongo() {
   const client = new MongoClient(mongoUri, { useUnifiedTopology: true });
@@ -39,8 +51,6 @@ async function connectToMongo() {
   console.log('Połączono z MongoDB!');
 }
 connectToMongo().catch(console.error);
-
-///////////////////////////////////// REJESTRACJA ///////////////////////////////////////////////////////////
 
 app.post('/api/register', async (req, res) => {
   const { username, email, password } = req.body;
@@ -65,7 +75,7 @@ app.post('/api/register', async (req, res) => {
       email,
       points: 1000,
       password: hashedPassword,
-      avatar: '', // ⬅️ domyślnie brak avatara
+      avatar: '',
       createdAt: new Date()
     };
 
@@ -78,8 +88,6 @@ app.post('/api/register', async (req, res) => {
     res.status(500).json({ error: 'Błąd serwera' });
   }
 });
-
-///////////////////////////////////// LOGOWANIE ///////////////////////////////////////////////////////////
 
 app.post('/api/login', async (req, res) => {
   const { identifier, password } = req.body;
@@ -124,8 +132,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-///////////////////////////////////// POBIERZ ZALOGOWANEGO //////////////////////////////////////////////////
-
 app.get('/api/me', (req, res) => {
   if (req.session.user) {
     res.json({ user: req.session.user });
@@ -134,16 +140,12 @@ app.get('/api/me', (req, res) => {
   }
 });
 
-///////////////////////////////////// WYLOGOWANIE ///////////////////////////////////////////////////////////
-
 app.post('/api/logout', (req, res) => {
   req.session.destroy(() => {
     res.clearCookie('connect.sid');
     res.json({ message: 'Logged out' });
   });
 });
-
-///////////////////////////////////// ZAPIS AVATARA (BASE64) ///////////////////////////////////////////////
 
 app.post('/api/upload-avatar', async (req, res) => {
   const { email, avatar } = req.body;
@@ -172,7 +174,8 @@ app.post('/api/upload-avatar', async (req, res) => {
   }
 });
 
-///////////////////////////////////// START SERWERA ///////////////////////////////////////////////////////
+const crashRoutes = require('./crash/routes/crashRoutes');
+app.use('/api/crash', crashRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
