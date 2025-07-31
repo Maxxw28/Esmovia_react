@@ -24,6 +24,7 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24
   }
 }));
+///////////// MongoDB
 
 const mongoUri = 'mongodb://172.24.3.152:27017';
 const dbName = 'BoomBatDb';
@@ -174,9 +175,32 @@ app.post('/api/upload-avatar', async (req, res) => {
   }
 });
 
+///////////////////////////////////// LEADERBOARD ///////////////////////////////////////////////////
+
+// Pobierz TOP 10 użytkowników z największą liczbą punktów
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    const leaderboard = await usersCollection
+      .find({}, { projection: { _id: 0, username: 1, points: 1, avatar: 1 } }) // pobierz tylko potrzebne pola
+      .sort({ points: -1 })
+      .limit(10) // Top 10, możesz zmienić
+      .toArray();
+
+    res.json({ leaderboard });
+  } catch (error) {
+    console.error('[LEADERBOARD BŁĄD]', error.message);
+    res.status(500).json({ error: 'Błąd serwera.' });
+  }
+});
+
+/////// CRASH API /////////
+
 const crashRoutes = require('./crash/routes/crashRoutes');
 app.use('/api/crash', crashRoutes);
 
+///////////////////////////////////// START SERWERA ///////////////////////////////////////////////////////
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
+
 });
