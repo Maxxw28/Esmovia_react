@@ -7,6 +7,18 @@ export default function VideoPage() {
   useEffect(() => {
     const video = document.getElementById('reward-video');
 
+    // useEffect(() => {
+    //  const lastWatched = localStorage.getItem('lastWatched');
+    // const today = new Date().toDateString();
+
+    // if (lastWatched === today) {
+    //   alert("You have already watched the video today.");
+    //   window.location.hash = '#/dashboard/earnings';
+    // }
+    //}, [navigate]);
+
+
+
     const handleEnded = () => {
       // Zapisz datę obejrzenia (opcjonalnie)
       const today = new Date().toDateString();
