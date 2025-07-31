@@ -228,6 +228,28 @@ app.get('/api/leaderboard', async (req, res) => {
 const crashRoutes = require('./crash/routes/crashRoutes');
 app.use('/api/crash', crashRoutes);
 
+///////////////////////////////////// AKTUALIZACJA PUNKTÓW ////////////////////////////////////////////////////
+
+app.post('/api/update-points', async (req, res) => {
+  const { email, points } = req.body;
+  if (!email || typeof points !== 'number') {
+    return res.status(400).json({ error: 'Brakuje emaila lub punktów.' });
+  }
+  try {
+    const result = await usersCollection.updateOne(
+      { email },
+      { $set: { points } }
+    );
+    if (result.modifiedCount === 1) {
+      if (req.session.user) req.session.user.points = points;
+      res.json({ message: 'Saldo zaktualizowane.' });
+    } else {
+      res.status(404).json({ error: 'Użytkownik nie znaleziony.' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Błąd serwera.' });
+  }
+});
 
 // =================================================================
 //                           START SERWERA

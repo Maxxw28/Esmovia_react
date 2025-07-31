@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import RouletteStrip from "./RouletteStrip";
 
 const COLORS = {
@@ -55,7 +55,7 @@ const categoryLabels = {
 };
 
 const Roulette = () => {
-  const [balance, setBalance] = useState(1000);
+  const [balance, setBalance] = useState(0);
   const [result, setResult] = useState(null);
   const [spinning, setSpinning] = useState(false);
   const [message, setMessage] = useState("");
@@ -110,7 +110,19 @@ const Roulette = () => {
     });
   };
 
-  const handleSpin = () => {
+  // Pobierz saldo z backendu przy wejściu na stronę
+  useEffect(() => {
+    async function fetchBalance() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) return;
+      const res = await fetch(`http://localhost:5000/api/me`, { credentials: 'include' });
+      const data = await res.json();
+      setBalance(data.user.points);
+    }
+    fetchBalance();
+  }, []);
+
+  const handleSpin = async () => {
     if (spinning) return;
 
     // Sprawdź czy jest jakikolwiek aktywny zakład
@@ -139,7 +151,7 @@ const Roulette = () => {
     setSpinning(true);
     setMessage("");
 
-    setTimeout(() => {
+    setTimeout(async () => {
       let winAmount = 0;
       const newWins = {};
 
@@ -222,6 +234,19 @@ const Roulette = () => {
 
       const newBalance = balance - totalBet() + winAmount;
 
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        // Wyślij nowe saldo do backendu
+        await fetch('http://localhost:5000/api/update-points', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ email: user.email, points: newBalance }),
+        });
+        // Zaktualizuj localStorage
+        user.points = newBalance;
+        localStorage.setItem('user', JSON.stringify(user));
+      }
       setBalance(newBalance);
       setWins(newWins);
       setMessage(
