@@ -7,6 +7,8 @@ import Coin  from '/images/batcoin.png'
 export default function Miner() {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [batCoins, setBatCoins] = useState(0);
+  const [floatingText, setFloatingText] = useState(null);
 
   function startMining() {
   if (loading) return;
@@ -24,9 +26,21 @@ export default function Miner() {
     if (current >= 100) {
       clearInterval(timer);
       setLoading(false);
-      // tutaj możesz dodać losowanie nagrody!
+      
+      const reward = rollRewards();
+      setBatCoins(prev => prev + reward);
+      setFloatingText(`+${reward}`)
+      setTimeout(() => setFloatingText(null), 1500);
     }
   }, interval);
+}
+function rollRewards(){
+  const roll = Math.random()*100;
+  if(roll < 0.1) return 100;
+  if(roll < 0.6) return 50;
+  if(roll < 5.6) return 10;
+  if(roll < 55.6) return 2;
+  return 1;
 }
 
   return (
@@ -39,8 +53,7 @@ export default function Miner() {
             disabled={loading}
             className={`text-xl text-white rounded-xl w-40 h-10 mb-2 ${
               loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
-            }`}
-          >
+            }`}>
             {loading ? 'Mining...' : 'Start Mining'}
           </button>
           {loading && (
@@ -51,6 +64,13 @@ export default function Miner() {
               ></div>
             </div>
           )}
+          {floatingText && (
+            <div className='absolute top-20 text-5xl font-bold text-purple-900 animate-float2'>
+              {floatingText}
+              <img src={Coin} alt="" className='w-30'/>        
+            </div>
+          )}
+
         </div>
         </div>
           <div className='w-70 h-60 p-5 border-solid border-gray-200 border-4 rounded-3xl shadow-md absolute top-50 left-10 hover:border-purple-300'>
@@ -73,7 +93,7 @@ export default function Miner() {
               </li>
           </ul>
           </div>
-          <h2 className='text-2xl mt-8 text-black-700 font-semibold text-right'>BatCoins: </h2>
+          <h2 className='text-2xl mt-8 text-black-700 font-semibold text-right'>BatCoins: {batCoins}</h2>
         </>
   )
 }
