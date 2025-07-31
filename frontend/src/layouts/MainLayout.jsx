@@ -74,7 +74,6 @@ const MainLayout = () => {
             >
               <Trophy className="w-5 h-5" />
             </Link>
-
             {/* Profil */}
             <Link
               to="/dashboard/profile"
@@ -91,7 +90,6 @@ const MainLayout = () => {
                 <User className="w-5 h-5" />
               )}
             </Link>
-
             {/* Punkty */}
             <div className="flex items-center gap-3 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-700 select-none">
               <span className="text-lg font-semibold text-gray-800 dark:text-white">

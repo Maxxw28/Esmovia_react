@@ -51,12 +51,19 @@ const handleClick = () => {
     <>
     <div className='flex justify-center'>
       <img src={Batphoto} onClick={handleClick} alt="Bat" className='w-110 border-solid border-gray-200 border-4 rounded-3xl shadow-md active:scale-110 transition-transform duration-200 cursor-pointer hover:border-purple-300'/>
-      {floatingText && (
-        <div className='absolute text-3xl font-bold text-purple-900 animate-float'>
-          {floatingText}
-          <img src={Coin} alt="" className='w-10'/>
-        </div>
-      )}
+    {floatingText && (
+      <div
+        key={floatingText.id}
+        className="absolute text-3xl font-bold text-black-900 animate-float flex items-center gap-2"
+        style={{
+        left: `${Math.random() * 40 + 30}%`, // losowe przesunięcie poziome (opcjonalne)
+        top: `${Math.random() * 20 + 30}%`,  // losowe przesunięcie pionowe (opcjonalne)
+        }}
+      >
+        {floatingText}
+        <img src={Coin} alt="BatCoin" className="w-10" />
+      </div>
+    )}
     </div>
       <div className='w-70 h-60 p-5 border-solid border-gray-200 border-4 rounded-3xl shadow-md absolute top-50 left-10 hover:border-purple-300'>
         <h2 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Percent chances:</h2>
