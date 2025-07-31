@@ -1,5 +1,14 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Game1() {
-	return <div>To będzie gra 1</div>;
+	return (
+	<>
+		<Link to="/dashboard/crash" className="flex items-center gap-2">
+			<button>CRASH</button>
+		</Link>
+
+	</>
+
+	)
 }

@@ -1,84 +1,71 @@
 import React, { useEffect, useRef, useState } from "react";
+import axios from "axios";
+
+axios.defaults.withCredentials = true;
 
 export default function CrashGame() {
-  const [gameState, setGameState] = useState("waiting"); // waiting | running | crashed
+  const [gameState, setGameState] = useState("waiting");
   const [multiplier, setMultiplier] = useState(1);
   const [crashPoint, setCrashPoint] = useState(null);
   const [bet, setBet] = useState(10);
   const [cashedOut, setCashedOut] = useState(false);
   const [winnings, setWinnings] = useState(0);
   const [cashoutMultiplier, setCashoutMultiplier] = useState(null);
-  const [history, setHistory] = useState([]); // historia crashów (mnożników)
+  const [history, setHistory] = useState([]);
   const intervalRef = useRef(null);
 
-  useEffect(() => {
-    if (gameState === "running") {
-      intervalRef.current = setInterval(() => {
-        setMultiplier((prev) => {
-          const newMult = +(prev * 1.01).toFixed(2);
-
-          if (newMult >= crashPoint) {
-            clearInterval(intervalRef.current);
-            setGameState("crashed");
-            if (!cashedOut) {
-              setWinnings(0);
-              setCashoutMultiplier(null);
-            }
-            return crashPoint;
-          }
-          return newMult;
-        });
-      }, 100);
-    }
-
-    return () => clearInterval(intervalRef.current);
-  }, [gameState, crashPoint, cashedOut]);
-
-  useEffect(() => {
-    if (gameState === "crashed" && crashPoint !== null) {
-      setHistory((h) => {
-        const newHistory = [crashPoint, ...h];
-        return newHistory.slice(0, 10);
-      });
-    }
-  }, [gameState, crashPoint]);
-
-  const generateCrashPoint = () => {
-    const rand = Math.random();
-
-    if (rand < 0.15) {
-      return 1.0;
-    } else if (rand < 0.5) {
-      return parseFloat((1 + Math.random()).toFixed(2));
-    } else {
-      return parseFloat((2 + Math.random() * 4.5).toFixed(2));
+  const pollGameState = async () => {
+    try {
+      const { data } = await axios.get("http://localhost:5000/api/crash/state");
+      setGameState(data.gameState);
+      setMultiplier(data.multiplier);
+      setCrashPoint(data.crashPoint);
+      setCashedOut(data.cashedOut);
+      setWinnings(data.winnings);
+      setCashoutMultiplier(data.cashoutMultiplier);
+      setHistory(data.history);
+    } catch (err) {
+      console.error("Błąd pobierania stanu gry:", err);
     }
   };
 
-  const startGame = () => {
-    const generatedCrash = generateCrashPoint();
-    setCrashPoint(generatedCrash);
-    setGameState("running");
-    setMultiplier(1);
-    setCashedOut(false);
-    setWinnings(0);
-    setCashoutMultiplier(null);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      pollGameState();
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const startGame = async () => {
+    try {
+      const res = await axios.post("http://localhost:5000/api/crash/start", { bet });
+      setCrashPoint(res.data.crashPoint);
+      setMultiplier(1);
+      setCashedOut(false);
+      setWinnings(0);
+      setCashoutMultiplier(null);
+    } catch (err) {
+      console.error("Błąd startu gry:", err);
+    }
   };
 
-  const handleCashout = () => {
-    if (gameState === "running" && !cashedOut) {
+  const handleCashout = async () => {
+    try {
+      const res = await axios.post("http://localhost:5000/api/crash/cashout");
+      setWinnings(res.data.winnings);
       setCashedOut(true);
-      setWinnings(parseFloat((bet * multiplier).toFixed(2)));
-      setCashoutMultiplier(multiplier);
+    } catch (err) {
+      console.error("Błąd wypłaty:", err);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-2 mb-5 p-5 text-center font-sans">
+    <div className="max-w-md mx-auto mt-5 p-5 text-center font-sans">
       {/* Historia mnożników */}
       <div className="flex justify-center gap-2 mb-4 flex-wrap">
         {history.length === 0 && (
-          <div className="text-gray-500 text-sm">No history yet</div>
+          <div className="text-gray-500 text-sm">Brak historii</div>
         )}
         {history.map((val, i) => (
           <div
@@ -144,14 +131,16 @@ export default function CrashGame() {
 
       {gameState === "crashed" && (
         <div className="mt-5 text-lg">
-          <p>
-            {cashedOut
-              ? `✅ You cashed out at ${cashoutMultiplier.toFixed(2)}x`
-              : "❌ You crashed!"}
-          </p>
-          <p className="text-gray-600 text-sm">
-            💥 Crash occurred at: {crashPoint.toFixed(2)}x
-          </p>
+          {cashedOut && cashoutMultiplier !== null ? (
+            <p>✅ You cashed out at {cashoutMultiplier.toFixed(2)}x</p>
+          ) : (
+            <p>❌ You crashed!</p>
+          )}
+          {crashPoint !== null && (
+            <p className="text-gray-600 text-sm">
+              💥 Crash occurred at: {crashPoint.toFixed(2)}x
+            </p>
+          )}
         </div>
       )}
     </div>
