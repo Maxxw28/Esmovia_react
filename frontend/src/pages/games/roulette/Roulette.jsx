@@ -251,7 +251,7 @@ const Roulette = () => {
       setWins(newWins);
       setMessage(
         winAmount > 0
-          ? `Wygrałeś ${winAmount} zł! (${rolledNumber} - ${COLORS[color]})`
+          ? `Wygrałeś ${winAmount} BC! (${rolledNumber} - ${COLORS[color]})`
           : `Przegrałeś. Wypadło ${rolledNumber} (${COLORS[color]})`
       );
       setSpinning(false);
@@ -331,12 +331,12 @@ const Roulette = () => {
 
       {/* Player balance */}
       <div className="mt-4 mb-2 text-2xl font-bold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
-        Balance: <span className="font-bold">{balance} zł</span>
+        Balance: <span className="font-bold">{balance} BC</span>
       </div>
 
       {/* Total bet */}
       <div className="mb-2 text-lg font-semibold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
-        Total bet: <span className="font-bold">{totalBet()} zł</span>
+        Total bet: <span className="font-bold">{totalBet()} BC</span>
       </div>
 
       {/* Total win */}
@@ -392,7 +392,7 @@ const Roulette = () => {
                 return sum > 0 ? `+${sum}` : sum;
               })()
             : "0"}
-        </span> zł
+        </span> BC
       </div>
 
       <div className="w-full max-w-md mt-8 flex flex-col gap-2">
