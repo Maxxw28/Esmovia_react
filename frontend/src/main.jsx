@@ -8,8 +8,7 @@ import Home from './pages/Home.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
-import Game1 from './pages/Game1.jsx';
-import Leaderboard from './pages/LeaderBoard.jsx'
+import Leaderboard from './pages/LeaderBoard.jsx';
 import Selection from './pages/earnings/Selection.jsx';
 import Miner from './pages/earnings/Miner.jsx';
 import Roulette from './pages/games/roulette/Roulette.jsx';
@@ -19,6 +18,7 @@ import Crash from './pages/games/crash/Crash.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import NotFoundDashboard from './pages/NotFoundDashboard.jsx';
+import GameSelection from './pages/games/GameSelection.jsx';
 
 createRoot(document.getElementById('root')).render(
 	<StrictMode>
@@ -36,13 +36,13 @@ createRoot(document.getElementById('root')).render(
 					>
 						<Route index element={<Home />} />
 						<Route path="profile" element={<Dashboard />} />
-						
+
 						<Route path="earnings">
 							<Route index element={<Selection />} />
 							<Route path="miner" element={<Miner />} />
 							<Route path="clicker" element={<Clicker />} />
 						</Route>
-						<Route path="game1" element={<Game1 />} />
+						<Route path="games" element={<GameSelection />} />
 						<Route path="leaderboard" element={<Leaderboard />} />
 						<Route path="roulette" element={<Roulette />} />
 						<Route path="crash" element={<Crash />} />
@@ -51,7 +51,6 @@ createRoot(document.getElementById('root')).render(
 					<Route path="/login" element={<Login />} />
 					<Route path="/register" element={<Register />} />
 					<Route path="*" element={<NotFoundPage />} />
-
 				</Routes>
 			</ThemeProvider>
 		</HashRouter>
