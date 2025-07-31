@@ -1,11 +1,23 @@
+// =================================================================
+//                    IMPORTOWANIE ZALEŻNOŚCI (MODUŁÓW)
+// =================================================================
+
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const { MongoClient } = require('mongodb');
 const bcrypt = require('bcrypt');
 
+// =================================================================
+//                    INICJALIZACJA APLIKACJI EXPRESS
+// ===============================================================
+
 const app = express();
 const port = 5000;
+
+// =================================================================
+//                        KONFIGURACJA MIDDLEWARE
+// =================================================================
 
 app.use(express.json({ limit: '5mb' }));
 
@@ -24,7 +36,10 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24
   }
 }));
-///////////// MongoDB
+
+// =================================================================
+//                   KONFIGURACJA I POŁĄCZENIE Z MONGODB
+// =================================================================
 
 const mongoUri = 'mongodb://172.24.3.152:27017';
 const dbName = 'BoomBatDb';
@@ -52,6 +67,13 @@ async function connectToMongo() {
   console.log('Połączono z MongoDB!');
 }
 connectToMongo().catch(console.error);
+
+// =================================================================
+//                           ENDPOINTY API
+// =================================================================
+
+
+///////////////////////////////////// REJESTRACJA ///////////////////////////////////////////////////////////
 
 app.post('/api/register', async (req, res) => {
   const { username, email, password } = req.body;
@@ -89,6 +111,8 @@ app.post('/api/register', async (req, res) => {
     res.status(500).json({ error: 'Błąd serwera' });
   }
 });
+
+///////////////////////////////////// LOGOWANIE ///////////////////////////////////////////////////////////
 
 app.post('/api/login', async (req, res) => {
   const { identifier, password } = req.body;
@@ -133,6 +157,8 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+///////////////////////////////////// POBIERZ ZALOGOWANEGO UŻYTKOWNIKA //////////////////////////////////////
+
 app.get('/api/me', (req, res) => {
   if (req.session.user) {
     res.json({ user: req.session.user });
@@ -141,12 +167,16 @@ app.get('/api/me', (req, res) => {
   }
 });
 
+///////////////////////////////////// WYLOGOWANIE ///////////////////////////////////////////////////////////
+
 app.post('/api/logout', (req, res) => {
   req.session.destroy(() => {
     res.clearCookie('connect.sid');
     res.json({ message: 'Logged out' });
   });
 });
+
+///////////////////////////////////// ZAPIS AVATARA (BASE64) ///////////////////////////////////////////////
 
 app.post('/api/upload-avatar', async (req, res) => {
   const { email, avatar } = req.body;
@@ -181,9 +211,9 @@ app.post('/api/upload-avatar', async (req, res) => {
 app.get('/api/leaderboard', async (req, res) => {
   try {
     const leaderboard = await usersCollection
-      .find({}, { projection: { _id: 0, username: 1, points: 1, avatar: 1 } }) // pobierz tylko potrzebne pola
+      .find({}, { projection: { _id: 0, username: 1, points: 1, avatar: 1 } })
       .sort({ points: -1 })
-      .limit(10) // Top 10, możesz zmienić
+      .limit(50) // Top 50 <-------------- można zmienić
       .toArray();
 
     res.json({ leaderboard });
@@ -193,12 +223,15 @@ app.get('/api/leaderboard', async (req, res) => {
   }
 });
 
-/////// CRASH API /////////
+///////////////////////////////////// CRASH API ////////////////////////////////////////////////////
 
 const crashRoutes = require('./crash/routes/crashRoutes');
 app.use('/api/crash', crashRoutes);
 
-///////////////////////////////////// START SERWERA ///////////////////////////////////////////////////////
+
+// =================================================================
+//                           START SERWERA
+// =================================================================
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
