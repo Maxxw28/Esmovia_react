@@ -13,7 +13,7 @@
 }
 
 .animate-float {
-  animation: floatUp 0.5s ease-out forwards;
+  animation: floatUp 1s ease-out forwards;
 }
 .animate-float2 {
   animation: floatUp 5s ease-out forwards;
