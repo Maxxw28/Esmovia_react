@@ -1,0 +1,124 @@
+openapi: 3.0.0
+info:
+  title: BoomBat Clicker Game API
+  version: "1.0.0"
+  description: API for managing user state in the Clicker mini-game (clicks and BatCoins).
+
+servers:
+  - url: http://localhost:5001
+
+paths:
+  /clicker/state:
+    get:
+      summary: Get the current click count and BatCoins for the user
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Unique identifier of the user
+      responses:
+        "200":
+          description: Returns current game state for user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clicks:
+                    type: integer
+                    example: 450
+                  batCoins:
+                    type: integer
+                    example: 120
+        "404":
+          description: User not found or no game state
+
+  /clicker/click:
+    post:
+      summary: Register a click action and update click count and BatCoins accordingly
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId:
+                  type: string
+                  example: user123
+      responses:
+        "200":
+          description: Returns updated click count and BatCoins
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clicks:
+                    type: integer
+                    example: 451
+                  batCoins:
+                    type: integer
+                    example: 125
+                  reward:
+                    type: integer
+                    description: Coins earned from this click
+                    example: 5
+        "404":
+          description: User not found
+        "400":
+          description: Missing userId
+
+  /clicker/reset:
+    post:
+      summary: Reset the click count to zero for the user (BatCoins remain)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId:
+                  type: string
+                  example: user123
+      responses:
+        "200":
+          description: Click count reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Click count reset.
+        "404":
+          description: User not found
+
+  /clicker/chances:
+    get:
+      summary: Get probability distribution of rewards per click
+      responses:
+        "200":
+          description: Reward chances per click
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    reward:
+                      type: integer
+                      example: 5
+                    chancePercent:
+                      type: number
+                      example: 0.5
+                    description:
+                      type: string
+                      example: "0.5% chance to earn 5 BatCoins"
