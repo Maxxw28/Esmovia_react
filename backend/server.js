@@ -1,13 +1,25 @@
+// =================================================================
+//                    IMPORTOWANIE ZALEŻNOŚCI (MODUŁÓW)
+// =================================================================
+
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const { MongoClient } = require('mongodb');
 const bcrypt = require('bcrypt');
 
+// =================================================================
+//                    INICJALIZACJA APLIKACJI EXPRESS
+// ===============================================================
+
 const app = express();
 const port = 5000;
 
-app.use(express.json({ limit: '5mb' })); // ⬅️ zwiększony limit dla base64 obrazka
+// =================================================================
+//                        KONFIGURACJA MIDDLEWARE
+// =================================================================
+
+app.use(express.json({ limit: '5mb' }));
 
 app.use(cors({
   origin: 'http://localhost:5173',
@@ -25,11 +37,27 @@ app.use(session({
   }
 }));
 
-// MongoDB
-const mongoUri = 'mongodb://172.24.3.152:27017';
+// =================================================================
+//                   KONFIGURACJA I POŁĄCZENIE Z MONGODB
+// =================================================================
+
+const mongoUri = 'mongodb://172.24.3.152:27017'; // <-------------TU IP SERWERA MONGO
 const dbName = 'BoomBatDb';
 
 let db, usersCollection;
+
+let crashGame = {
+  gameState: 'waiting',
+  multiplier: 1,
+  crashPoint: null,
+  cashedOut: false,
+  winnings: 0,
+  cashoutMultiplier: null,
+  history: [],
+  bet: 0
+};
+
+let interval = null;
 
 async function connectToMongo() {
   const client = new MongoClient(mongoUri, { useUnifiedTopology: true });
@@ -39,6 +67,11 @@ async function connectToMongo() {
   console.log('Połączono z MongoDB!');
 }
 connectToMongo().catch(console.error);
+
+// =================================================================
+//                           ENDPOINTY API
+// =================================================================
+
 
 ///////////////////////////////////// REJESTRACJA ///////////////////////////////////////////////////////////
 
@@ -60,12 +93,12 @@ app.post('/api/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = {
+    const newUser = {  // <--------- STRUKTURA UŻYTKOWNIKA W DB 
       username,
       email,
       points: 1000,
       password: hashedPassword,
-      avatar: '', // ⬅️ domyślnie brak avatara
+      avatar: '',
       createdAt: new Date()
     };
 
@@ -124,7 +157,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-///////////////////////////////////// POBIERZ ZALOGOWANEGO //////////////////////////////////////////////////
+///////////////////////////////////// POBIERZ ZALOGOWANEGO UŻYTKOWNIKA //////////////////////////////////////
 
 app.get('/api/me', (req, res) => {
   if (req.session.user) {
@@ -172,8 +205,35 @@ app.post('/api/upload-avatar', async (req, res) => {
   }
 });
 
-///////////////////////////////////// START SERWERA ///////////////////////////////////////////////////////
+///////////////////////////////////// LEADERBOARD ///////////////////////////////////////////////////
+
+// Pobierz TOP 10 użytkowników z największą liczbą punktów
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    const leaderboard = await usersCollection
+      .find({}, { projection: { _id: 0, username: 1, points: 1, avatar: 1 } })
+      .sort({ points: -1 })
+      .limit(50) // Top 50 <-------------- można zmienić
+      .toArray();
+
+    res.json({ leaderboard });
+  } catch (error) {
+    console.error('[LEADERBOARD BŁĄD]', error.message);
+    res.status(500).json({ error: 'Błąd serwera.' });
+  }
+});
+
+///////////////////////////////////// CRASH API ////////////////////////////////////////////////////
+
+const crashRoutes = require('./crash/routes/crashRoutes');
+app.use('/api/crash', crashRoutes);
+
+
+// =================================================================
+//                           START SERWERA
+// =================================================================
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
+
 });
