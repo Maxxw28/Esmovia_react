@@ -30,13 +30,13 @@ export default function VideoPage() {
   }, [navigate]);
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex justify-center items-start h-screen">
       <video
         id="reward-video"
         src="/images/reward.mp4"
         autoPlay
         controls={false}
-        className="w-[80%] rounded-xl shadow-lg pointer-events-none"
+        className="w-[60%] rounded-xl shadow-lg pointer-events-none"
       />
     </div>
   );
