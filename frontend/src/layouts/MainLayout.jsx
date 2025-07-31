@@ -32,31 +32,17 @@ const MainLayout = () => {
 
 					{/* Menu */}
 					<div className="flex items-center gap-6">
-						{/* Dark mode toggle */}
+						{/* Tryb jasny/ciemny jako kafelek */}
 						<button
 							onClick={toggleTheme}
-							className="relative transition-colors bg-gray-300 rounded-full w-14 h-7 dark:bg-gray-700"
-							title="Przełącz motyw"
+							title="Motyw"
+							className="p-1 text-gray-600 transition rounded shadow-sm dark:text-gray-300 hover:text-indigo-500"
 						>
-							<span
-								className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
-									theme === 'dark' ? 'translate-x-7' : ''
-								}`}
-							/>
-							<span className="absolute w-4 h-4 top-1 left-1">
-								<Sun
-									className={`w-4 h-4 text-yellow-500 transition-opacity ${
-										theme === 'dark' ? 'opacity-0' : 'opacity-100'
-									}`}
-								/>
-							</span>
-							<span className="absolute w-4 h-4 top-1 right-1">
-								<Moon
-									className={`w-4 h-4 text-gray-800 dark:text-gray-200 transition-opacity ${
-										theme === 'dark' ? 'opacity-100' : 'opacity-0'
-									}`}
-								/>
-							</span>
+							{theme === 'dark' ? (
+								<Sun className="w-5 h-5" />
+							) : (
+								<Moon className="w-5 h-5" />
+							)}
 						</button>
 
 						{/* Gry */}
