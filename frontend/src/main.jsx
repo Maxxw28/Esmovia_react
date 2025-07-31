@@ -19,6 +19,7 @@ import Crash from './pages/games/crash/Crash.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import NotFoundDashboard from './pages/NotFoundDashboard.jsx';
+import VideoPage from './pages/earnings/VideoPage.jsx';
 
 createRoot(document.getElementById('root')).render(
 	<StrictMode>
@@ -41,6 +42,7 @@ createRoot(document.getElementById('root')).render(
 							<Route index element={<Selection />} />
 							<Route path="miner" element={<Miner />} />
 							<Route path="clicker" element={<Clicker />} />
+							<Route path="videopage" element={<VideoPage />}/>
 						</Route>
 						<Route path="game1" element={<Game1 />} />
 						<Route path="leaderboard" element={<Leaderboard />} />
