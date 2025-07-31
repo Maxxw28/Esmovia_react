@@ -9,6 +9,8 @@ import { useTheme } from '../utils/ThemeContext';
 const MainLayout = () => {
 	const { theme, toggleTheme } = useTheme();
 	const [user, setUser] = useState(null);
+	const { theme, toggleTheme } = useTheme();
+	const [user, setUser] = useState(null);
 
 	useEffect(() => {
 		const storedUser = localStorage.getItem('user');
@@ -16,7 +18,25 @@ const MainLayout = () => {
 			setUser(JSON.parse(storedUser));
 		}
 	}, []);
+	useEffect(() => {
+		const storedUser = localStorage.getItem('user');
+		if (storedUser) {
+			setUser(JSON.parse(storedUser));
+		}
+	}, []);
 
+	return (
+		<div className="flex flex-col min-h-screen transition-colors bg-white dark:bg-gray-900">
+			{/* NAVBAR */}
+			<header className="sticky top-0 z-50 shadow-md backdrop-blur bg-white/80 dark:bg-gray-800/80">
+				<div className="flex items-center justify-between px-4 py-3 mx-auto max-w-7xl sm:px-6 lg:px-8">
+					{/* Logo + Nazwa */}
+					<Link to="/dashboard" className="flex items-center gap-2">
+						<img src={Logo} alt="Boom Bat Logo" className="w-auto h-10" />
+						<span className="text-2xl font-bold text-gray-800 dark:text-white">
+							Boom Bat
+						</span>
+					</Link>
 	return (
 		<div className="flex flex-col min-h-screen transition-colors bg-white dark:bg-gray-900">
 			{/* NAVBAR */}
@@ -58,6 +78,34 @@ const MainLayout = () => {
 								/>
 							</span>
 						</button>
+					{/* Menu */}
+					<div className="flex items-center gap-6">
+						{/* Dark mode toggle */}
+						<button
+							onClick={toggleTheme}
+							className="relative transition-colors bg-gray-300 rounded-full w-14 h-7 dark:bg-gray-700"
+							title="Przełącz motyw"
+						>
+							<span
+								className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+									theme === 'dark' ? 'translate-x-7' : ''
+								}`}
+							/>
+							<span className="absolute w-4 h-4 top-1 left-1">
+								<Sun
+									className={`w-4 h-4 text-yellow-500 transition-opacity ${
+										theme === 'dark' ? 'opacity-0' : 'opacity-100'
+									}`}
+								/>
+							</span>
+							<span className="absolute w-4 h-4 top-1 right-1">
+								<Moon
+									className={`w-4 h-4 text-gray-800 dark:text-gray-200 transition-opacity ${
+										theme === 'dark' ? 'opacity-100' : 'opacity-0'
+									}`}
+								/>
+							</span>
+						</button>
 
 						{/* Gry */}
 						<Link
@@ -67,7 +115,55 @@ const MainLayout = () => {
 						>
 							<Gamepad2 className="w-5 h-5" />
 						</Link>
+						{/* Gry */}
+						<Link
+							to="/dashboard/games"
+							title="Gry"
+							className="p-1 text-gray-600 transition rounded shadow-sm dark:text-gray-300 hover:text-indigo-500"
+						>
+							<Gamepad2 className="w-5 h-5" />
+						</Link>
 
+						{/* Ranking */}
+						<Link
+							to="/dashboard/leaderboard"
+							title="Ranking"
+							className="p-1 text-gray-600 transition rounded shadow-sm dark:text-gray-300 hover:text-indigo-500"
+						>
+							<Trophy className="w-5 h-5" />
+						</Link>
+						{/* Profil */}
+						<Link
+							to="/dashboard/profile"
+							title="Profil"
+							className="p-1 text-gray-600 transition rounded shadow-sm dark:text-gray-300 hover:text-indigo-500"
+						>
+							{user?.avatar ? (
+								<img
+									src={user.avatar}
+									alt="Avatar"
+									className="object-cover w-8 h-8 border-2 border-gray-300 rounded-full shadow dark:border-white"
+								/>
+							) : (
+								<User className="w-5 h-5" />
+							)}
+						</Link>
+						{/* Punkty */}
+						<div className="flex items-center gap-3 px-3 py-1 bg-purple-100 rounded-full select-none dark:bg-purple-700">
+							<span className="text-lg font-semibold text-gray-800 dark:text-white">
+								{user?.points?.toLocaleString('pl-PL') ?? 0}
+							</span>
+							<Link
+								to="/dashboard/earnings"
+								title="Zdobądź więcej"
+								className="flex items-center justify-center transition bg-white rounded-full shadow-sm w-7 h-7 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500"
+							>
+								<img src={Coin} alt="BatCoin" className="w-auto h-5" />
+							</Link>
+						</div>
+					</div>
+				</div>
+			</header>
 						{/* Ranking */}
 						<Link
 							to="/dashboard/leaderboard"

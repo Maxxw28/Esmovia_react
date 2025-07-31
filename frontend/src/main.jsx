@@ -8,6 +8,7 @@ import Home from './pages/Home.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import GameSelection from './pages/games/GameSelection.jsx';
 import Leaderboard from './pages/LeaderBoard.jsx';
 import Selection from './pages/earnings/Selection.jsx';
 import Miner from './pages/earnings/Miner.jsx';
@@ -18,7 +19,6 @@ import Crash from './pages/games/crash/Crash.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import NotFoundDashboard from './pages/NotFoundDashboard.jsx';
-import GameSelection from './pages/games/GameSelection.jsx';
 
 createRoot(document.getElementById('root')).render(
 	<StrictMode>
@@ -43,6 +43,7 @@ createRoot(document.getElementById('root')).render(
 							<Route path="clicker" element={<Clicker />} />
 						</Route>
 						<Route path="games" element={<GameSelection />} />
+						<Route path="BoomBat" element={<Crash />} />
 						<Route path="leaderboard" element={<Leaderboard />} />
 						<Route path="roulette" element={<Roulette />} />
 						<Route path="crash" element={<Crash />} />
