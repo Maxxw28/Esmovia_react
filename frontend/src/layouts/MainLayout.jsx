@@ -90,7 +90,7 @@ const MainLayout = () => {
 			</header>
 
 			<main className="p-6 text-gray-900 dark:text-white transition-colors">
-				<Crash />
+				<Outlet />
 			</main>
 		</div>
 	);
