@@ -283,6 +283,19 @@ const Roulette = () => {
 
       <RouletteStrip selectedNumber={result?.number ?? 0} spinning={spinning} onEnd={() => {}} />
 
+      <button
+        onClick={() => {
+          setWins({});
+          setLastResults(null);
+          handleSpin();
+        }}
+        disabled={spinning}
+        className="mt-6 bg-green-600 hover:bg-green-700 text-white px-10 py-2 rounded text-lg transition w-64"
+        style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
+      >
+        {spinning ? "Kręcę..." : "Zakręć"}
+      </button>
+
       <div className="w-full max-w-md mt-8 flex flex-col gap-2">
         <div className="w-full">
           <div className="grid grid-cols-3 gap-3 mb-2">
@@ -307,7 +320,24 @@ const Roulette = () => {
                   min={1}
                   disabled={!bets[key].active}
                   value={bets[key].amount}
-                  onChange={e => handleAmount(key, e.target.value)}
+                  onChange={e => {
+                    // Pozwól tylko na liczby całkowite
+                    const val = e.target.value.replace(/[^0-9]/g, "");
+                    handleAmount(key, val);
+                  }}
+                  onKeyDown={e => {
+                    // Blokuj wszystkie znaki poza cyframi, backspace, delete, tab, arrows, home, end
+                    if (
+                      !(
+                        (e.key >= "0" && e.key <= "9") ||
+                        ["Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)
+                      )
+                    ) {
+                      e.preventDefault();
+                    }
+                  }}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   className="w-full px-3 py-2 rounded-lg text-black bg-white text-lg border border-gray-300 focus:outline-none"
                   placeholder="Kwota"
                   style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
@@ -342,7 +372,24 @@ const Roulette = () => {
                   min={1}
                   disabled={!bets[key].active}
                   value={bets[key].amount}
-                  onChange={e => handleAmount(key, e.target.value)}
+                  onChange={e => {
+                    // Pozwól tylko na liczby całkowite
+                    const val = e.target.value.replace(/[^0-9]/g, "");
+                    handleAmount(key, val);
+                  }}
+                  onKeyDown={e => {
+                    // Blokuj wszystkie znaki poza cyframi, backspace, delete, tab, arrows, home, end
+                    if (
+                      !(
+                        (e.key >= "0" && e.key <= "9") ||
+                        ["Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)
+                      )
+                    ) {
+                      e.preventDefault();
+                    }
+                  }}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   className="w-full px-3 py-2 rounded-lg text-black bg-white text-lg border border-gray-300 focus:outline-none"
                   placeholder="Kwota"
                   style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
@@ -377,7 +424,24 @@ const Roulette = () => {
                   min={1}
                   disabled={!bets[key].active}
                   value={bets[key].amount}
-                  onChange={e => handleAmount(key, e.target.value)}
+                  onChange={e => {
+                    // Pozwól tylko na liczby całkowite
+                    const val = e.target.value.replace(/[^0-9]/g, "");
+                    handleAmount(key, val);
+                  }}
+                  onKeyDown={e => {
+                    // Blokuj wszystkie znaki poza cyframi, backspace, delete, tab, arrows, home, end
+                    if (
+                      !(
+                        (e.key >= "0" && e.key <= "9") ||
+                        ["Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)
+                      )
+                    ) {
+                      e.preventDefault();
+                    }
+                  }}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   className="w-full px-3 py-2 rounded-lg text-black bg-white text-lg border border-gray-300 focus:outline-none"
                   placeholder="Kwota"
                   style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
@@ -419,7 +483,22 @@ const Roulette = () => {
                     type="number"
                     min={1}
                     value={bets.exacts[num]}
-                    onChange={e => handleExactBetChange(num, e.target.value)}
+                    onChange={e => {
+                      const val = e.target.value.replace(/[^0-9]/g, "");
+                      handleExactBetChange(num, val);
+                    }}
+                    onKeyDown={e => {
+                      if (
+                        !(
+                          (e.key >= "0" && e.key <= "9") ||
+                          ["Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)
+                        )
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     className="w-full text-lg rounded-lg text-black bg-white border border-gray-300 px-2 py-1 text-center"
                     style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
                   />
@@ -435,19 +514,6 @@ const Roulette = () => {
           Suma zakładów: <span className="font-bold">{totalBet()} zł</span>
         </div>
       </div>
-
-      <button
-        onClick={() => {
-          setWins({});
-          setLastResults(null);
-          handleSpin();
-        }}
-        disabled={spinning}
-        className="mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded text-lg transition"
-        style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
-      >
-        {spinning ? "Kręcę..." : "Zakręć"}
-      </button>
     </div>
   );
 };
