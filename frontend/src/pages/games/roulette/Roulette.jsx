@@ -61,6 +61,7 @@ const Roulette = () => {
   const [message, setMessage] = useState("");
   const [bets, setBets] = useState(initialBets);
   const [wins, setWins] = useState({}); // { betKey: liczba punktów/null }
+  const [lastResults, setLastResults] = useState(null); // <-- nowy stan na boxy wyników
 
   // Obsługa zmiany checkboxa i kwoty
   const handleCheck = (key, checked) => {
@@ -128,6 +129,8 @@ const Roulette = () => {
       return;
     }
 
+    setLastResults(null); // <-- USUŃ boxy wyników przed losowaniem
+
     const rolledNumber = rouletteOrder[Math.floor(Math.random() * rouletteOrder.length)];
     const color = rolledNumber === 0 ? "green" :
       [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(rolledNumber) ? "red" : "black";
@@ -148,8 +151,10 @@ const Roulette = () => {
             winAmount += points;
             newWins[key] = points;
           } else {
-            newWins[key] = 0;
+            newWins[key] = -Number(bets[key].amount);
           }
+        } else {
+          newWins[key] = 0;
         }
       });
 
@@ -160,8 +165,10 @@ const Roulette = () => {
           winAmount += points;
           newWins.even = points;
         } else {
-          newWins.even = 0;
+          newWins.even = -Number(bets.even.amount);
         }
+      } else {
+        newWins.even = 0;
       }
       if (bets.odd.active && Number(bets.odd.amount) > 0) {
         if (rolledNumber % 2 === 1) {
@@ -169,8 +176,10 @@ const Roulette = () => {
           winAmount += points;
           newWins.odd = points;
         } else {
-          newWins.odd = 0;
+          newWins.odd = -Number(bets.odd.amount);
         }
+      } else {
+        newWins.odd = 0;
       }
 
       // Zakresy
@@ -180,8 +189,10 @@ const Roulette = () => {
           winAmount += points;
           newWins.rangeLow = points;
         } else {
-          newWins.rangeLow = 0;
+          newWins.rangeLow = -Number(bets.rangeLow.amount);
         }
+      } else {
+        newWins.rangeLow = 0;
       }
       if (bets.rangeHigh.active && Number(bets.rangeHigh.amount) > 0) {
         if (rolledNumber >= 19 && rolledNumber <= 36) {
@@ -189,8 +200,10 @@ const Roulette = () => {
           winAmount += points;
           newWins.rangeHigh = points;
         } else {
-          newWins.rangeHigh = 0;
+          newWins.rangeHigh = -Number(bets.rangeHigh.amount);
         }
+      } else {
+        newWins.rangeHigh = 0;
       }
 
       // Konkretne liczby (nie zmieniamy)
@@ -210,8 +223,20 @@ const Roulette = () => {
           : `Przegrałeś. Wypadło ${rolledNumber} (${COLORS[color]})`
       );
       setSpinning(false);
-      setBets(initialBets); // wyczyść zakłady po spinie
-      setTimeout(() => setWins({}), 7000); // WYDŁUŻONY czas komunikatów do 7s
+      setBets(initialBets);
+
+      // ZAPISZ boxy wyników na sztywno
+      setLastResults({
+        red: newWins.red,
+        black: newWins.black,
+        green: newWins.green,
+        even: newWins.even,
+        odd: newWins.odd,
+        rangeLow: newWins.rangeLow,
+        rangeHigh: newWins.rangeHigh,
+      });
+
+      setTimeout(() => setWins({}), 7000);
     }, 2800);
   };
 
@@ -225,7 +250,7 @@ const Roulette = () => {
       }`}
       aria-pressed={checked}
       tabIndex={0}
-      style={{ fontFamily: "'Montserrat', Arial, sans-serif", minWidth: 120 }}
+      style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
     >
       {label}
     </button>
@@ -237,18 +262,20 @@ const Roulette = () => {
       className={`w-full px-4 py-2 rounded-lg border-2 font-bold text-xl flex items-center justify-center ${colorClass}`}
       style={{
         fontFamily: "'Bebas Neue', 'Montserrat', Arial, sans-serif",
-        minWidth: 120,
         minHeight: 48,
         color: value > 0 ? "#FFD700" : value < 0 ? "#FF3333" : "#888888",
         backgroundColor: "rgba(0,0,0,0.15)",
         borderColor: value > 0 ? "#FFD700" : value < 0 ? "#FF3333" : "#888888",
         borderWidth: 2,
-        margin: "0 auto"
+        transition: "background 0.2s"
       }}
     >
       {value > 0 ? `+${value}` : value < 0 ? value : "0"}
     </div>
   );
+
+  // Szerokość kolumny tabeli
+  const colWidth = "min-w-[140px] max-w-[180px] w-full";
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center pt-10 px-4" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
@@ -257,13 +284,16 @@ const Roulette = () => {
       <RouletteStrip selectedNumber={result?.number ?? 0} spinning={spinning} onEnd={() => {}} />
 
       <div className="w-full max-w-md mt-8 flex flex-col gap-2">
-
-        {/* Zakłady pojedyncze - KAŻDY OSOBNO */}
-        <div className="flex flex-col gap-2">
+        <div className="w-full">
+          <div className="grid grid-cols-3 gap-3 mb-2">
+            <div className={`text-center font-semibold ${colWidth}`}>Zakład</div>
+            <div className={`text-center font-semibold ${colWidth}`}>Kwota</div>
+            <div className={`text-center font-semibold ${colWidth}`}>Wynik</div>
+          </div>
           {/* Kolory */}
           {["red", "black", "green"].map((key) => (
-            <div key={key} className="grid grid-cols-3 gap-2 items-center">
-              <div className="flex justify-center w-full">
+            <div key={key} className="grid grid-cols-3 gap-3 items-center mb-2">
+              <div className={colWidth}>
                 <CustomCheckbox
                   checked={bets[key].active}
                   onChange={(checked) => handleCheck(key, checked)}
@@ -271,7 +301,7 @@ const Roulette = () => {
                   label={categoryLabels[key]}
                 />
               </div>
-              <div>
+              <div className={colWidth}>
                 <input
                   type="number"
                   min={1}
@@ -283,17 +313,9 @@ const Roulette = () => {
                   style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
                 />
               </div>
-              <div>
+              <div className={colWidth}>
                 <ResultBox
-                  value={
-                    wins[key] !== undefined
-                      ? bets[key].active && Number(bets[key].amount) > 0
-                        ? wins[key] > 0
-                          ? wins[key]
-                          : -Number(bets[key].amount)
-                        : 0
-                      : ""
-                  }
+                  value={lastResults ? lastResults[key] : ""}
                   colorClass={categoryStyles[key]}
                 />
               </div>
@@ -305,8 +327,8 @@ const Roulette = () => {
             { key: "even", label: "Parzyste" },
             { key: "odd", label: "Nieparzyste" },
           ].map(({ key, label }) => (
-            <div key={key} className="grid grid-cols-3 gap-2 items-center">
-              <div className="flex justify-center w-full">
+            <div key={key} className="grid grid-cols-3 gap-3 items-center mb-2">
+              <div className={colWidth}>
                 <CustomCheckbox
                   checked={bets[key].active}
                   onChange={(checked) => handleCheck(key, checked)}
@@ -314,7 +336,7 @@ const Roulette = () => {
                   label={label}
                 />
               </div>
-              <div>
+              <div className={colWidth}>
                 <input
                   type="number"
                   min={1}
@@ -326,17 +348,9 @@ const Roulette = () => {
                   style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
                 />
               </div>
-              <div>
+              <div className={colWidth}>
                 <ResultBox
-                  value={
-                    wins[key] !== undefined
-                      ? bets[key].active && Number(bets[key].amount) > 0
-                        ? wins[key] > 0
-                          ? wins[key]
-                          : -Number(bets[key].amount)
-                        : 0
-                      : ""
-                  }
+                  value={lastResults ? lastResults[key] : ""}
                   colorClass={categoryStyles[key]}
                 />
               </div>
@@ -348,8 +362,8 @@ const Roulette = () => {
             { key: "rangeLow", label: "1-18" },
             { key: "rangeHigh", label: "19-36" },
           ].map(({ key, label }) => (
-            <div key={key} className="grid grid-cols-3 gap-2 items-center">
-              <div className="flex justify-center w-full">
+            <div key={key} className="grid grid-cols-3 gap-3 items-center mb-2">
+              <div className={colWidth}>
                 <CustomCheckbox
                   checked={bets[key].active}
                   onChange={(checked) => handleCheck(key, checked)}
@@ -357,7 +371,7 @@ const Roulette = () => {
                   label={label}
                 />
               </div>
-              <div>
+              <div className={colWidth}>
                 <input
                   type="number"
                   min={1}
@@ -369,17 +383,9 @@ const Roulette = () => {
                   style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
                 />
               </div>
-              <div>
+              <div className={colWidth}>
                 <ResultBox
-                  value={
-                    wins[key] !== undefined
-                      ? bets[key].active && Number(bets[key].amount) > 0
-                        ? wins[key] > 0
-                          ? wins[key]
-                          : -Number(bets[key].amount)
-                        : 0
-                      : ""
-                  }
+                  value={lastResults ? lastResults[key] : ""}
                   colorClass={categoryStyles[key]}
                 />
               </div>
@@ -432,7 +438,8 @@ const Roulette = () => {
 
       <button
         onClick={() => {
-          setWins({}); // wyzeruj wyniki przed losowaniem
+          setWins({});
+          setLastResults(null);
           handleSpin();
         }}
         disabled={spinning}
@@ -441,81 +448,6 @@ const Roulette = () => {
       >
         {spinning ? "Kręcę..." : "Zakręć"}
       </button>
-
-      {/* Wyniki zakładów */}
-      <div className="mt-6 w-full max-w-md flex flex-col gap-2">
-        <div className="grid grid-cols-3 gap-2">
-          {["red", "black", "green"].map((key) => (
-            <ResultBox
-              key={key}
-              value={
-                wins[key] !== undefined
-                  ? bets[key].active && Number(bets[key].amount) > 0
-                    ? wins[key] > 0
-                      ? wins[key]
-                      : -Number(bets[key].amount)
-                    : 0
-                  : ""
-              }
-              colorClass={categoryStyles[key]}
-            />
-          ))}
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { key: "even", label: "Parzyste" },
-            { key: "odd", label: "Nieparzyste" },
-          ].map(({ key }) => (
-            <ResultBox
-              key={key}
-              value={
-                wins[key] !== undefined
-                  ? bets[key].active && Number(bets[key].amount) > 0
-                    ? wins[key] > 0
-                      ? wins[key]
-                      : -Number(bets[key].amount)
-                    : 0
-                  : ""
-              }
-              colorClass={categoryStyles[key]}
-            />
-          ))}
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { key: "rangeLow", label: "1-18" },
-            { key: "rangeHigh", label: "19-36" },
-          ].map(({ key }) => (
-            <ResultBox
-              key={key}
-              value={
-                wins[key] !== undefined
-                  ? bets[key].active && Number(bets[key].amount) > 0
-                    ? wins[key] > 0
-                      ? wins[key]
-                      : -Number(bets[key].amount)
-                    : 0
-                  : ""
-              }
-              colorClass={categoryStyles[key]}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-6 text-center">
-        <p className="text-2xl font-bold" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
-          Saldo: <span className="font-bold">{balance} zł</span>
-        </p>
-        {message && (
-          <p
-            className="mt-4 text-2xl font-bold"
-            style={{ fontFamily: "'Montserrat', Arial, sans-serif", color: "#FFD700" }}
-          >
-            {message}
-          </p>
-        )}
-      </div>
     </div>
   );
 };
