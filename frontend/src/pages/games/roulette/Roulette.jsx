@@ -296,6 +296,11 @@ const Roulette = () => {
         {spinning ? "Kręcę..." : "Zakręć"}
       </button>
 
+      {/* Saldo gracza */}
+      <div className="mt-4 mb-2 text-2xl font-bold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
+        Saldo: <span className="font-bold">{balance} zł</span>
+      </div>
+
       <div className="w-full max-w-md mt-8 flex flex-col gap-2">
         <div className="w-full">
           <div className="grid grid-cols-3 gap-3 mb-2">
