@@ -22,7 +22,7 @@ const MainLayout = () => {
 		// Nasłuchuj zmiany localStorage (np. po spinie ruletki)
 		window.addEventListener('storage', updateUser);
 
-		// Opcjonalnie: odświeżaj saldo co kilka sekund (jeśli zmiany są tylko lokalne)
+		// Opcjonalnie: odświeżaj saldo co kilka sekund (jeśli zmiany są tylko lokalne) TU UWAGA, POTEM WYJEAĆ
 		const interval = setInterval(updateUser, 1000);
 
 		return () => {
