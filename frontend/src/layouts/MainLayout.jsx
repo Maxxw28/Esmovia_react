@@ -85,9 +85,6 @@ const MainLayout = () => {
                         <Link to="/dashboard/earnings" className="flex items-center justify-center w-8 h-8 bg-white rounded-full dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600">
                            <img src={Coin} alt="BatCoin" className="w-auto h-6" />
                         </Link>
-                         <Link to="/dashboard/earnings" className="flex items-center justify-center w-8 h-8 text-xl font-bold text-green-600 bg-white rounded-full dark:bg-gray-700 dark:text-green-400 hover:bg-gray-200 dark:hover:bg-gray-600">
-                           +
-                        </Link>
                     </div>
                 </div>
             </header>
