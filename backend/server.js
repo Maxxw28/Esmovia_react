@@ -41,7 +41,7 @@ app.use(session({
 //                   KONFIGURACJA I POŁĄCZENIE Z MONGODB
 // =================================================================
 
-const mongoUri = 'mongodb://172.24.3.152:27017';
+const mongoUri = 'mongodb://172.24.3.152:27017'; // <-------------TU IP SERWERA MONGO
 const dbName = 'BoomBatDb';
 
 let db, usersCollection;
@@ -93,7 +93,7 @@ app.post('/api/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = {
+    const newUser = {  // <--------- STRUKTURA UŻYTKOWNIKA W DB 
       username,
       email,
       points: 1000,
