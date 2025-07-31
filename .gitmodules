@@ -1,0 +1,3 @@
+[submodule "Users-API"]
+	path = Users-API
+	url = https://github.com/Elteys/Users-API
