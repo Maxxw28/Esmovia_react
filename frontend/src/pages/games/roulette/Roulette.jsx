@@ -45,11 +45,11 @@ const categoryStyles = {
 };
 
 const categoryLabels = {
-  red: "Czerwony",
-  black: "Czarny",
-  green: "Zielony",
-  even: "Parzyste",
-  odd: "Nieparzyste",
+  red: "Red",
+  black: "Black",
+  green: "Green",
+  even: "Even",
+  odd: "Odd",
   rangeLow: "1-18",
   rangeHigh: "19-36",
 };
@@ -206,12 +206,19 @@ const Roulette = () => {
         newWins.rangeHigh = 0;
       }
 
-      // Konkretne liczby (nie zmieniamy)
-      for (const n in bets.exacts) {
-        if (Number(n) === rolledNumber && bets.exacts[n] > 0) {
-          winAmount += bets.exacts[n] * 35;
+      // Konkretne liczby - zapisz wyniki dla wszystkich liczb
+      const exactResults = {};
+      rouletteOrder.forEach((n) => {
+        if (n === 0) return;
+        const betAmount = bets.exacts[n] || 0;
+        if (Number(n) === rolledNumber && betAmount > 0) {
+          exactResults[n] = betAmount * 35;
+        } else if (betAmount > 0) {
+          exactResults[n] = -betAmount;
+        } else {
+          exactResults[n] = 0;
         }
-      }
+      });
 
       const newBalance = balance - totalBet() + winAmount;
 
@@ -234,6 +241,7 @@ const Roulette = () => {
         odd: newWins.odd,
         rangeLow: newWins.rangeLow,
         rangeHigh: newWins.rangeHigh,
+        exacts: exactResults, // <-- dodaj wyniki dla wszystkich liczb
       });
 
       setTimeout(() => setWins({}), 7000);
@@ -279,7 +287,7 @@ const Roulette = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center pt-10 px-4" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
-      <h1 className="text-3xl font-bold mb-6">Ruletka</h1>
+      <h1 className="text-3xl font-bold mb-6">Roulette</h1>
 
       <RouletteStrip selectedNumber={result?.number ?? 0} spinning={spinning} onEnd={() => {}} />
 
@@ -293,20 +301,81 @@ const Roulette = () => {
         className="mt-6 bg-green-600 hover:bg-green-700 text-white px-10 py-2 rounded text-lg transition w-64"
         style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
       >
-        {spinning ? "Kręcę..." : "Zakręć"}
+        {spinning ? "Spinning..." : "Spin"}
       </button>
 
-      {/* Saldo gracza */}
+      {/* Player balance */}
       <div className="mt-4 mb-2 text-2xl font-bold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
-        Saldo: <span className="font-bold">{balance} zł</span>
+        Balance: <span className="font-bold">{balance} zł</span>
+      </div>
+
+      {/* Total bet */}
+      <div className="mb-2 text-lg font-semibold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
+        Total bet: <span className="font-bold">{totalBet()} zł</span>
+      </div>
+
+      {/* Total win */}
+      <div className="mb-4 text-lg font-semibold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
+        Total win:{" "}
+        <span className="font-bold" style={{
+          color:
+            lastResults &&
+            (
+              (lastResults.red || 0) +
+              (lastResults.black || 0) +
+              (lastResults.green || 0) +
+              (lastResults.even || 0) +
+              (lastResults.odd || 0) +
+              (lastResults.rangeLow || 0) +
+              (lastResults.rangeHigh || 0) +
+              (lastResults.exacts
+                ? Object.values(lastResults.exacts).reduce((a, b) => a + b, 0)
+                : 0)
+            ) > 0
+              ? "#FFD700"
+              : (
+                lastResults &&
+                (
+                  (lastResults.red || 0) +
+                  (lastResults.black || 0) +
+                  (lastResults.green || 0) +
+                  (lastResults.even || 0) +
+                  (lastResults.odd || 0) +
+                  (lastResults.rangeLow || 0) +
+                  (lastResults.rangeHigh || 0) +
+                  (lastResults.exacts
+                    ? Object.values(lastResults.exacts).reduce((a, b) => a + b, 0)
+                    : 0)
+                ) < 0
+              )
+              ? "#FF3333"
+              : "#888888"
+        }}>
+          {lastResults
+            ? (() => {
+                const sum =
+                  (lastResults.red || 0) +
+                  (lastResults.black || 0) +
+                  (lastResults.green || 0) +
+                  (lastResults.even || 0) +
+                  (lastResults.odd || 0) +
+                  (lastResults.rangeLow || 0) +
+                  (lastResults.rangeHigh || 0) +
+                  (lastResults.exacts
+                    ? Object.values(lastResults.exacts).reduce((a, b) => a + b, 0)
+                    : 0);
+                return sum > 0 ? `+${sum}` : sum;
+              })()
+            : "0"}
+        </span> zł
       </div>
 
       <div className="w-full max-w-md mt-8 flex flex-col gap-2">
         <div className="w-full">
           <div className="grid grid-cols-3 gap-3 mb-2">
-            <div className={`text-center font-semibold ${colWidth}`}>Zakład</div>
-            <div className={`text-center font-semibold ${colWidth}`}>Kwota</div>
-            <div className={`text-center font-semibold ${colWidth}`}>Wynik</div>
+            <div className={`text-center font-semibold ${colWidth}`}>Bet</div>
+            <div className={`text-center font-semibold ${colWidth}`}>Amount</div>
+            <div className={`text-center font-semibold ${colWidth}`}>Result</div>
           </div>
           {/* Kolory */}
           {["red", "black", "green"].map((key) => (
@@ -344,7 +413,7 @@ const Roulette = () => {
                   inputMode="numeric"
                   pattern="[0-9]*"
                   className="w-full px-3 py-2 rounded-lg text-black bg-white text-lg border border-gray-300 focus:outline-none"
-                  placeholder="Kwota"
+                  placeholder="Amount"
                   style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
                 />
               </div>
@@ -396,7 +465,7 @@ const Roulette = () => {
                   inputMode="numeric"
                   pattern="[0-9]*"
                   className="w-full px-3 py-2 rounded-lg text-black bg-white text-lg border border-gray-300 focus:outline-none"
-                  placeholder="Kwota"
+                  placeholder="Amount"
                   style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
                 />
               </div>
@@ -448,7 +517,7 @@ const Roulette = () => {
                   inputMode="numeric"
                   pattern="[0-9]*"
                   className="w-full px-3 py-2 rounded-lg text-black bg-white text-lg border border-gray-300 focus:outline-none"
-                  placeholder="Kwota"
+                  placeholder="Amount"
                   style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
                 />
               </div>
@@ -464,30 +533,54 @@ const Roulette = () => {
       </div>
 
       {/* Konkretne liczby */}
-      <div className="mt-6 w-full max-w-md">
-        <p className="text-sm mb-2 text-center">Wybierz liczby i kwoty (x35):</p>
-        <div className="grid grid-cols-9 gap-1">
-          {rouletteOrder.filter((num) => num !== 0).map((num) => (
-            <div key={num} className="flex flex-col items-center w-full">
-              <button
-                onClick={() =>
-                  bets.exacts[num]
-                    ? handleRemoveExact(num)
-                    : handleExactBetChange(num, 1)
-                }
-                className={`text-xs h-8 w-8 rounded ${
-                  bets.exacts[num] ? "bg-white text-black" : "bg-gray-700 text-white"
-                }`}
-                style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
-              >
-                {num}
-              </button>
-              {bets.exacts[num] !== undefined && (
-                <div className="flex flex-col items-center mt-1 w-full">
+      <div className="mt-6 w-full max-w-3xl">
+        <p className="text-sm mb-2 text-center">Choose numbers and amounts (x35):</p>
+        <div className="grid grid-cols-4 gap-6">
+          {rouletteOrder.filter((num) => num !== 0).map((num) => {
+            // Ustal kolor tła jak na ruletce
+            let btnColor = "bg-gray-700 text-white";
+            if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(num)) {
+              btnColor = "bg-red-600 text-white";
+            } else if (
+              [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35].includes(num)
+            ) {
+              btnColor = "bg-black text-white";
+            }
+            if (bets.exacts[num]) {
+              btnColor = "bg-white text-black border-2 border-yellow-400";
+            }
+
+            // Wylicz wynik dla tej liczby na podstawie ostatniego losowania
+            let exactResult = "0";
+            if (lastResults && lastResults.exacts && lastResults.exacts[num] !== undefined) {
+              const val = lastResults.exacts[num];
+              if (val > 0) exactResult = "+" + val;
+              else if (val < 0) exactResult = val.toString();
+              else exactResult = "0";
+            }
+
+            return (
+              <div key={num} className="flex flex-col items-center w-full">
+                <button
+                  onClick={() =>
+                    bets.exacts[num]
+                      ? handleRemoveExact(num)
+                      : handleExactBetChange(num, 1)
+                  }
+                  className={`text-xl h-16 w-full rounded ${btnColor}`}
+                  style={{
+                    fontFamily: "'Montserrat', Arial, sans-serif'",
+                    minWidth: 120,
+                    maxWidth: 180,
+                  }}
+                >
+                  {num}
+                </button>
+                <div className="flex flex-col items-center mt-3 w-full">
                   <input
                     type="number"
                     min={1}
-                    value={bets.exacts[num]}
+                    value={bets.exacts[num] || ""}
                     onChange={e => {
                       const val = e.target.value.replace(/[^0-9]/g, "");
                       handleExactBetChange(num, val);
@@ -504,21 +597,46 @@ const Roulette = () => {
                     }}
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    className="w-full text-lg rounded-lg text-black bg-white border border-gray-300 px-2 py-1 text-center"
-                    style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
+                    className="w-full text-xl rounded-lg text-black bg-white border border-gray-300 px-6 py-3 text-center"
+                    style={{
+                      fontFamily: "'Montserrat', Arial, sans-serif'",
+                      minWidth: 120,
+                      maxWidth: 180,
+                    }}
                   />
                 </div>
-              )}
-            </div>
-          ))}
+                <div
+                  className="w-full px-4 py-2 rounded-lg border-2 font-bold text-xl flex items-center justify-center mt-2"
+                  style={{
+                    fontFamily: "'Bebas Neue', 'Montserrat', Arial, sans-serif",
+                    minHeight: 48,
+                    minWidth: 120,
+                    maxWidth: 180,
+                    color:
+                      exactResult.startsWith("+")
+                        ? "#FFD700"
+                        : exactResult.startsWith("-")
+                        ? "#FF3333"
+                        : "#888888",
+                    backgroundColor: "rgba(0,0,0,0.15)",
+                    borderColor:
+                      exactResult.startsWith("+")
+                        ? "#FFD700"
+                        : exactResult.startsWith("-")
+                        ? "#FF3333"
+                        : "#888888",
+                    borderWidth: 2,
+                    transition: "background 0.2s"
+                  }}
+                >
+                  {exactResult}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-6 space-y-3">
-        <div className="text-lg font-semibold" style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}>
-          Suma zakładów: <span className="font-bold">{totalBet()} zł</span>
-        </div>
-      </div>
     </div>
   );
 };
