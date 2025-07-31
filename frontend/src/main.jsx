@@ -42,6 +42,7 @@ createRoot(document.getElementById('root')).render(
 						</Route>
 						<Route path="game1" element={<Game1 />} />
 						<Route path="roulette" element={<Roulette />} />
+						<Route path="crash" element={<Crash />} />
 						<Route path="*" element={<NotFoundDashboard />} />
 					</Route>
 					<Route path="/login" element={<Login />} />
