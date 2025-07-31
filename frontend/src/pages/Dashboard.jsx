@@ -137,7 +137,7 @@ export default function Dashboard() {
 				{/* Header */}
 				<div className="flex items-center justify-between mb-8">
 					<h1 className="text-4xl font-bold text-gray-800 dark:text-white">
-						<span className="text-blue-500 dark:text-blue-600">Dashboard</span>
+						Dashboard
 					</h1>
 					<div className="flex items-center space-x-4">
 						<button

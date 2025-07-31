@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 export default function NotFoundDashboard() {
 	return (
 		<div>
-			<section className="flex items-center justify-center mt-10 bg-white dark:bg-gray-900 h-max">
+			<section className="flex items-center justify-center mt-10 h-max">
 				<div className="max-w-screen-xl px-4 pb-8 mx-auto lg:py-16 lg:px-6">
 					<div className="max-w-screen-sm mx-auto text-center">
 						<h1 className="mb-4 font-extrabold tracking-tight text-blue-600 text-7xl lg:text-9xl dark:text-blue-500">

@@ -6,7 +6,7 @@ export default function GameSelection() {
 			<Link to="/dashboard/crash" className="flex items-center gap-2">
 				<button>-- CRASH</button>
 			</Link>
-			<Link to="/dashboard/Roulette" className="flex items-center gap-2">
+			<Link to="/dashboard/roulette" className="flex items-center gap-2">
 				<button>-- ROULETTE</button>
 			</Link>
 		</>
