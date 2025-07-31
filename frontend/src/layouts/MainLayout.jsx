@@ -18,7 +18,7 @@ const MainLayout = () => {
 	}, []);
 
 	return (
-		<div className="min-h-screen transition-colors bg-white dark:bg-gray-900">
+		<div className="flex flex-col min-h-screen transition-colors bg-white dark:bg-gray-900">
 			<header className="flex items-center justify-between w-full px-6 py-4 transition-colors bg-white shadow dark:bg-gray-800">
 				{/* Lewa strona: logo + napis */}
 				<Link to="/dashboard" className="flex items-center gap-2">
@@ -58,7 +58,7 @@ const MainLayout = () => {
 
 					{/* Games */}
 					<Link
-						to="/dashboard/game1"
+						to="/dashboard/games"
 						className="flex items-center gap-1 text-sm font-medium text-gray-600 transition dark:text-gray-300 hover:text-blue-600"
 					>
 						<Gamepad2 className="w-12 h-12" />
@@ -104,7 +104,7 @@ const MainLayout = () => {
 				</div>
 			</header>
 
-			<main className="p-6 text-gray-900 transition-colors dark:text-white">
+			<main className="flex-1 p-6 text-gray-900 transition-colors dark:text-white bg-gradient-to-br from-gray-50 to-neutral-300 dark:from-black dark:via-gray-900 dark:to-purple-900">
 				<Outlet />
 			</main>
 		</div>
