@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link } from 'react-router-dom';
-// IMPORTUJ IKONĘ TROPHY <-- DODANE
 import { User, Gamepad2, Moon, Sun, Trophy } from 'lucide-react';
 import Logo from '/images/boombat.png';
 import Coin from '/images/batcoin.png';
@@ -8,95 +7,114 @@ import '../index.css';
 import { useTheme } from '../utils/ThemeContext';
 
 const MainLayout = () => {
-    const { theme, toggleTheme } = useTheme();
-    const [user, setUser] = useState(null);
+  const { theme, toggleTheme } = useTheme();
+  const [user, setUser] = useState(null);
 
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-    }, []);
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
-    return (
-        <div className="min-h-screen transition-colors bg-white dark:bg-gray-900">
-            <header className="flex items-center justify-between w-full px-6 py-4 transition-colors bg-white shadow dark:bg-gray-800">
-                {/* Lewa strona: logo + napis */}
-                <Link to="/dashboard" className="flex items-center gap-2">
-                    <img src={Logo} alt="Boom Bat Logo" className="w-auto h-12" />
-                    <span className="text-xl font-bold text-gray-800 dark:text-white">
-                        Boom Bat
-                    </span>
-                </Link>
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
+      {/* NAVBAR */}
+      <header className="sticky top-0 z-50 backdrop-blur bg-white/80 dark:bg-gray-800/80 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+          {/* Logo + Nazwa */}
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <img src={Logo} alt="Boom Bat Logo" className="h-10 w-auto" />
+            <span className="text-2xl font-bold text-gray-800 dark:text-white">Boom Bat</span>
+          </Link>
 
-                {/* Prawa strona */}
-                <div className="flex items-center gap-4">
-                    {/* Dark mode toggle */}
-                    <button
-                        onClick={toggleTheme}
-                        className="relative w-16 h-8 p-1 transition-colors bg-gray-300 rounded-full dark:bg-gray-600"
-                    >
-                        {/* ... (kod przełącznika dark mode bez zmian) ... */}
-                        <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transform transition-transform ${theme === 'dark' ? 'translate-x-8' : ''}`}></span>
-                        <span className="absolute flex items-center justify-center w-6 h-6 top-1 left-1"><Sun className={`w-4 h-4 text-yellow-500 transition-opacity ${theme === 'dark' ? 'opacity-0' : 'opacity-100'}`} /></span>
-                        <span className="absolute flex items-center justify-center w-6 h-6 top-1 right-1"><Moon className={`w-4 h-4 text-gray-800 dark:text-gray-200 transition-opacity ${theme === 'dark' ? 'opacity-100' : 'opacity-0'}`} /></span>
-                    </button>
+          {/* Menu */}
+          <div className="flex items-center gap-6">
+            {/* Dark mode toggle */}
+            <button
+              onClick={toggleTheme}
+              className="relative w-14 h-7 rounded-full bg-gray-300 dark:bg-gray-700 transition-colors"
+              title="Przełącz motyw"
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+                  theme === 'dark' ? 'translate-x-7' : ''
+                }`}
+              />
+              <span className="absolute top-1 left-1 w-4 h-4">
+                <Sun
+                  className={`w-4 h-4 text-yellow-500 transition-opacity ${
+                    theme === 'dark' ? 'opacity-0' : 'opacity-100'
+                  }`}
+                />
+              </span>
+              <span className="absolute top-1 right-1 w-4 h-4">
+                <Moon
+                  className={`w-4 h-4 text-gray-800 dark:text-gray-200 transition-opacity ${
+                    theme === 'dark' ? 'opacity-100' : 'opacity-0'
+                  }`}
+                />
+              </span>
+            </button>
 
-                    {/* Leaderboard Icon <-- DODANE */}
-                    <Link
-                        to="leaderboard"
-                        className="text-gray-600 transition dark:text-gray-300 hover:text-blue-600"
-                        title="Leaderboard"
-                    >
-                        <Trophy className="w-12 h-12" />
-                    </Link>
+            {/* Gry */}
+            <Link
+              to="/dashboard/game1"
+              title="Gry"
+              className="text-gray-600 dark:text-gray-300 hover:text-indigo-500 transition shadow-sm rounded p-1"
+            >
+              <Gamepad2 className="w-5 h-5" />
+            </Link>
 
-                    {/* Games */}
-                    <Link
-                        to="/dashboard/game1"
-                        className="flex items-center gap-1 text-sm font-medium text-gray-600 transition dark:text-gray-300 hover:text-blue-600"
-                        title="Gry"
-                    >
-                        <Gamepad2 className="w-12 h-12" />
-                    </Link>
+            {/* Ranking */}
+            <Link
+              to="/dashboard/leaderboard"
+              title="Ranking"
+              className="text-gray-600 dark:text-gray-300 hover:text-indigo-500 transition shadow-sm rounded p-1"
+            >
+              <Trophy className="w-5 h-5" />
+            </Link>
 
-                    {/* Profile */}
-                    <Link
-                        to="/dashboard/profile"
-                        className="text-gray-600 transition dark:text-gray-300 hover:text-blue-600"
-                        title="Profil"
-                    >
-                        {user?.avatar ? (
-                            <img
-                                src={user.avatar}
-                                alt="Avatar"
-                                className="object-cover w-12 h-12 border-2 border-gray-400 rounded-full dark:border-white"
-                            />
-                        ) : (
-                            <User className="w-12 h-12" />
-                        )}
-                    </Link>
-                    
-                    {/* Punkty */}
-                    <div className="flex items-center gap-2 p-2 bg-purple-200 dark:bg-purple-800 rounded-full">
-                        <span className="pl-2 text-xl font-bold text-gray-800 dark:text-white">
-                            {user?.points?.toLocaleString('pl-PL') ?? 0}
-                        </span>
-                        <Link to="/dashboard/earnings" className="flex items-center justify-center w-8 h-8 bg-white rounded-full dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600">
-                           <img src={Coin} alt="BatCoin" className="w-auto h-6" />
-                        </Link>
-                         <Link to="/dashboard/earnings" className="flex items-center justify-center w-8 h-8 text-xl font-bold text-green-600 bg-white rounded-full dark:bg-gray-700 dark:text-green-400 hover:bg-gray-200 dark:hover:bg-gray-600">
-                           +
-                        </Link>
-                    </div>
-                </div>
-            </header>
+            {/* Profil */}
+            <Link
+              to="/dashboard/profile"
+              title="Profil"
+              className="text-gray-600 dark:text-gray-300 hover:text-indigo-500 transition shadow-sm rounded p-1"
+            >
+              {user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt="Avatar"
+                  className="w-8 h-8 rounded-full object-cover border-2 border-gray-300 dark:border-white shadow"
+                />
+              ) : (
+                <User className="w-5 h-5" />
+              )}
+            </Link>
 
-            <main className="p-6 text-gray-900 transition-colors dark:text-white">
-                <Outlet />
-            </main>
+            {/* Punkty */}
+            <div className="flex items-center gap-3 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-700 select-none">
+              <span className="text-lg font-semibold text-gray-800 dark:text-white">
+                {user?.points?.toLocaleString('pl-PL') ?? 0}
+              </span>
+              <Link
+                to="/dashboard/earnings"
+                title="Zdobądź więcej"
+                className="flex items-center justify-center w-7 h-7 rounded-full bg-white dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 shadow-sm transition"
+              >
+                <img src={Coin} alt="BatCoin" className="h-5 w-auto" />
+              </Link>
+            </div>
+          </div>
         </div>
-    );
+      </header>
+
+      {/* Główna zawartość */}
+      <main className="p-4 md:p-6 text-gray-900 dark:text-white transition-colors">
+        <Outlet />
+      </main>
+    </div>
+  );
 };
 
-export default MainLayout
+export default MainLayout;
