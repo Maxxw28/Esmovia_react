@@ -120,13 +120,16 @@ export default function CrashGame() {
         )}
 
         {gameState === "crashed" && (
-          <button
-            onClick={() => setGameState("waiting")}
-            className="bg-green-600 text-white px-5 py-2 rounded-md font-bold text-lg hover:bg-green-700 transition"
-          >
-            Next Round
-          </button>
-        )}
+  <button
+    onClick={() => {
+      setGameState("waiting");
+      startGame();  // <-- tu dodaj wywołanie startGame, żeby zacząć nową rundę
+    }}
+    className="bg-green-600 text-white px-5 py-2 rounded-md font-bold text-lg hover:bg-green-700 transition"
+  >
+    Next Round
+  </button>
+)}
       </div>
 
       {gameState === "crashed" && (
