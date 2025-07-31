@@ -11,10 +11,24 @@ const MainLayout = () => {
 	const [user, setUser] = useState(null);
 
 	useEffect(() => {
-		const storedUser = localStorage.getItem('user');
-		if (storedUser) {
-			setUser(JSON.parse(storedUser));
-		}
+		const updateUser = () => {
+			const storedUser = localStorage.getItem('user');
+			if (storedUser) {
+				setUser(JSON.parse(storedUser));
+			}
+		};
+		updateUser();
+
+		// Nasłuchuj zmiany localStorage (np. po spinie ruletki)
+		window.addEventListener('storage', updateUser);
+
+		// Opcjonalnie: odświeżaj saldo co kilka sekund (jeśli zmiany są tylko lokalne)
+		const interval = setInterval(updateUser, 1000);
+
+		return () => {
+			window.removeEventListener('storage', updateUser);
+			clearInterval(interval);
+		};
 	}, []);
 
 	return (
