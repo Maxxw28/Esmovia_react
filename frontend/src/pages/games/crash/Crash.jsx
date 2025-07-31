@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import Batphoto from '/images/batclicker.png'
+import Batphoto2 from '/images/batclicker3.png'
+import Batphoto3 from '/images/batend.png'
 
 axios.defaults.withCredentials = true;
 
@@ -61,9 +64,10 @@ export default function CrashGame() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-5 p-5 text-center font-sans">
+    <div className="overflow-hidden">
+    <div className="max-w-md mx-auto p-5 text-center font-sans">
       {/* Historia mnożników */}
-      <div className="flex justify-center gap-2 mb-4 flex-wrap">
+      <div className="flex justify-center gap-2 mb-2 flex-wrap">
         {history.length === 0 && (
           <div className="text-gray-500 text-sm">Brak historii</div>
         )}
@@ -80,9 +84,34 @@ export default function CrashGame() {
 
       <h1 className="mb-5 text-2xl font-semibold">🚀 Crash Game</h1>
 
-      <div className="text-6xl font-bold font-mono mb-5">
-        {gameState === "crashed" ? "💥" : multiplier.toFixed(2)}x
-      </div>
+<div className="text-6xl font-bold font-mono mb-2 flex flex-col items-center justify-center relative">
+  {gameState === "crashed" ? (
+    <div className="w-[250px] h-[250px] relative">
+      <img
+        src={Batphoto3}
+        alt="Crash"
+        className="absolute top-0 left-0 w-[250px] h-[250px]"
+      />
+    </div>
+  ) : gameState === "running" ? (
+    <div className="w-[250px] h-[250px] relative">
+      <img
+        src={Batphoto}
+        alt="Bat Base"
+        className="absolute top-0 left-0 w-[250px] h-[250px]"
+      />
+      <img
+        src={Batphoto2}
+        alt="Bat Overlay"
+        className="absolute top-0 left-0 w-[250px] h-[250px] animate-fadeInOut"
+      />
+    </div>
+  ) : null}
+
+  {/* Mnożnik widoczny zawsze, poza waiting bez obrazu */}
+  <div className="">{multiplier.toFixed(2)}x</div>
+</div>
+
 
       {gameState === "waiting" && (
         <input
@@ -90,8 +119,10 @@ export default function CrashGame() {
           min="1"
           value={bet}
           onChange={(e) => setBet(Number(e.target.value))}
-          className="p-2 w-full text-lg mb-5 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+          className="p-2 w-full text-lg mb-5 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+
+        
+        
       )}
 
       <div className="flex justify-center gap-2">
@@ -104,7 +135,7 @@ export default function CrashGame() {
           </button>
         )}
 
-        {gameState === "running" && !cashedOut && (
+        {gameState === "running" && !cashedOut && (          
           <button
             onClick={handleCashout}
             className="bg-red-500 text-white px-5 py-2 rounded-md font-bold text-lg hover:bg-red-600 transition"
@@ -146,6 +177,9 @@ export default function CrashGame() {
           )}
         </div>
       )}
+
+
+    </div>
     </div>
   );
 }

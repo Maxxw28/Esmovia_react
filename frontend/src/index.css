@@ -18,3 +18,14 @@
 .animate-float2 {
   animation: floatUp 5s ease-out forwards;
 }
+
+@layer utilities {
+  @keyframes fadeInOut {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+
+  .animate-fadeInOut {
+    animation: fadeInOut 0.5s ease-in-out infinite;
+  }
+}
