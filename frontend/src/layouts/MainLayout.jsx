@@ -110,7 +110,7 @@ const MainLayout = () => {
 			</header>
 
 			{/* Główna zawartość */}
-			<main className="p-4 text-gray-900 transition-colors md:p-6 dark:text-white">
+			<main className="flex-1 p-6 text-gray-900 transition-colors dark:text-white bg-gradient-to-br from-gray-50 to-gray-200 dark:from-black dark:via-gray-900 dark:to-purple-900">
 				<Outlet />
 			</main>
 		</div>
