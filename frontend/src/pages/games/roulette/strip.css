@@ -11,3 +11,8 @@
     transform: translateX(-60px); /* przesuwa o 1 pole w lewo */
   }
 }
+.will-change-transform {
+  will-change: transform;
+  transform: translateZ(0);
+}
+

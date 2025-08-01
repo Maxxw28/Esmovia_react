@@ -251,6 +251,110 @@ app.post('/api/update-points', async (req, res) => {
   }
 });
 
+///////////////////////////////////// ROULETTE SPIN ////////////////////////////////////////////////////
+
+app.post('/api/roulette-spin', async (req, res) => {
+  const { email, bets } = req.body;
+  if (!email || !bets) {
+    return res.status(400).json({ error: 'Missing email or bets.' });
+  }
+
+  // Pobierz użytkownika
+  const user = await usersCollection.findOne({ email });
+  if (!user) return res.status(404).json({ error: 'User not found.' });
+
+  // Losowanie liczby (0-36)
+  const number = Math.floor(Math.random() * 37); // 0-36
+  const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+  const blackNumbers = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35];
+  let color = 'green';
+  if (number === 0) color = 'green';
+  else if (redNumbers.includes(number)) color = 'red';
+  else if (blackNumbers.includes(number)) color = 'black';
+
+  // Oblicz sumę zakładów
+  let totalBet = 0;
+  ["red", "black", "green", "even", "odd", "rangeLow", "rangeHigh"].forEach(key => {
+    if (bets[key]?.active && bets[key]?.amount) {
+      totalBet += Number(bets[key].amount);
+    }
+  });
+  Object.values(bets.exacts || {}).forEach(val => {
+    if (val) totalBet += Number(val);
+  });
+
+  if (totalBet > user.points) {
+    return res.status(400).json({ error: 'Not enough funds.' });
+  }
+
+  // Oblicz wygrane
+  let results = {
+    red: 0, black: 0, green: 0, even: 0, odd: 0, rangeLow: 0, rangeHigh: 0, exacts: {}
+  };
+
+  // Kolory
+  if (bets.red?.active && bets.red.amount) {
+    results.red = color === 'red' ? bets.red.amount * 2 : -bets.red.amount;
+  }
+  if (bets.black?.active && bets.black.amount) {
+    results.black = color === 'black' ? bets.black.amount * 2 : -bets.black.amount;
+  }
+  if (bets.green?.active && bets.green.amount) {
+    results.green = number === 0 ? bets.green.amount * 35 : -bets.green.amount;
+  }
+
+  // Parzyste/Nieparzyste (tylko dla 1-36)
+  if (bets.even?.active && bets.even.amount) {
+    results.even = number !== 0 && number % 2 === 0 ? bets.even.amount * 2 : -bets.even.amount;
+  }
+  if (bets.odd?.active && bets.odd.amount) {
+    results.odd = number !== 0 && number % 2 === 1 ? bets.odd.amount * 2 : -bets.odd.amount;
+  }
+
+  // Zakresy (tylko dla 1-36)
+  if (bets.rangeLow?.active && bets.rangeLow.amount) {
+    results.rangeLow = number >= 1 && number <= 18 ? bets.rangeLow.amount * 2 : -bets.rangeLow.amount;
+  }
+  if (bets.rangeHigh?.active && bets.rangeHigh.amount) {
+    results.rangeHigh = number >= 19 && number <= 36 ? bets.rangeHigh.amount * 2 : -bets.rangeHigh.amount;
+  }
+
+  // Dokładne liczby
+  Object.entries(bets.exacts || {}).forEach(([num, amount]) => {
+    if (Number(num) === number && amount > 0) {
+      results.exacts[num] = amount * 35;
+    } else if (amount > 0) {
+      results.exacts[num] = -amount;
+    } else {
+      results.exacts[num] = 0;
+    }
+  });
+
+  // Suma wygranych
+  const totalWin =
+    (results.red || 0) +
+    (results.black || 0) +
+    (results.green || 0) +
+    (results.even || 0) +
+    (results.odd || 0) +
+    (results.rangeLow || 0) +
+    (results.rangeHigh || 0) +
+    Object.values(results.exacts).reduce((a, b) => a + b, 0);
+
+  // Aktualizuj saldo
+  const newBalance = user.points - totalBet + totalWin;
+  await usersCollection.updateOne({ email }, { $set: { points: newBalance } });
+
+  // Zwróć wynik
+  res.json({
+    number,
+    color,
+    newBalance,
+    results,
+    message: totalWin > 0 ? "You win!" : totalWin < 0 ? "You lose!" : "No win."
+  });
+});
+
 // =================================================================
 //                           START SERWERA
 // =================================================================

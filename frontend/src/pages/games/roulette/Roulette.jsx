@@ -56,16 +56,84 @@ const categoryLabels = {
 
 const Roulette = () => {
   const [balance, setBalance] = useState(0);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState(null); // { number, color }
   const [spinning, setSpinning] = useState(false);
   const [message, setMessage] = useState("");
   const [bets, setBets] = useState(initialBets);
-  const [wins, setWins] = useState({}); // { betKey: liczba punktów/null }
-  const [lastResults, setLastResults] = useState(null); // <-- nowy stan na boxy wyników
+  const [lastResults, setLastResults] = useState(null);
 
-  // Dodaj uniwersalny styl tekstu z czarnym obwodem
   const textShadowStyle = {
     textShadow: "0 0 2px #000, 0 0 1px #000, 1px 1px 1px #000"
+  };
+
+  // Pobierz saldo z backendu przy wejściu na stronę i po każdym spinie
+  const fetchBalance = async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) return;
+    const res = await fetch(`http://localhost:5000/api/me`, { credentials: 'include' });
+    if (res.ok) {
+      const data = await res.json();
+      setBalance(data.user.points);
+    }
+  };
+
+  useEffect(() => {
+    fetchBalance();
+  }, []);
+
+  // Funkcja spin: wysyła zakłady do backendu, backend losuje liczbę i zwraca wynik
+  const handleSpin = async () => {
+    if (spinning) return;
+
+    const anyActive =
+      ["red", "black", "green", "even", "odd", "rangeLow", "rangeHigh"].some(
+        (key) => bets[key].active && Number(bets[key].amount) > 0
+      ) ||
+      Object.values(bets.exacts).filter(Boolean).length > 0;
+
+    if (!anyActive) {
+      setMessage("No bet selected!");
+      return;
+    }
+    if (totalBet() > balance) {
+      setMessage("Not enough funds!");
+      return;
+    }
+
+    setLastResults(null);
+    setSpinning(true);
+    setMessage("");
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    try {
+      const res = await fetch("http://localhost:5000/api/roulette-spin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email: user.email,
+          bets,
+        }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        // Backend zwraca: { number, color, newBalance, results, message }
+        setResult({ number: data.number, color: data.color }); // Ustaw wynik do animacji
+        setLastResults(data.results); // Wyniki zakładów
+        setMessage(data.message);
+        setBalance(data.newBalance); // Aktualizuj saldo
+        setBets(initialBets); // Wyzeruj zakłady
+
+
+        console.log({ number: data.number, color: data.color });
+      } else {
+        setMessage(data.error || "Server error");
+      }
+    } catch (err) {
+      setMessage("Network error");
+    }
+    setSpinning(false);
   };
 
   // Obsługa zmiany checkboxa i kwoty
@@ -115,169 +183,6 @@ const Roulette = () => {
     });
   };
 
-  // Pobierz saldo z backendu przy wejściu na stronę
-  useEffect(() => {
-    async function fetchBalance() {
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (!user) return;
-      const res = await fetch(`http://localhost:5000/api/me`, { credentials: 'include' });
-      const data = await res.json();
-      setBalance(data.user.points);
-    }
-    fetchBalance();
-  }, []);
-
-  const handleSpin = async () => {
-    if (spinning) return;
-
-    // Sprawdź czy jest jakikolwiek aktywny zakład
-    const anyActive =
-      ["red", "black", "green", "even", "odd", "rangeLow", "rangeHigh"].some(
-        (key) => bets[key].active && Number(bets[key].amount) > 0
-      ) ||
-      Object.values(bets.exacts).filter(Boolean).length > 0;
-
-    if (!anyActive) {
-      setMessage("Nie wybrano żadnego zakładu!");
-      return;
-    }
-    if (totalBet() > balance) {
-      setMessage("Za mało środków!");
-      return;
-    }
-
-    setLastResults(null); // <-- USUŃ boxy wyników przed losowaniem
-
-    const rolledNumber = rouletteOrder[Math.floor(Math.random() * rouletteOrder.length)];
-    const color = rolledNumber === 0 ? "green" :
-      [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(rolledNumber) ? "red" : "black";
-
-    setResult({ number: rolledNumber, color });
-    setSpinning(true);
-    setMessage("");
-
-    setTimeout(async () => {
-      let winAmount = 0;
-      const newWins = {};
-
-      // Kolory
-      ["red", "black", "green"].forEach((key) => {
-        if (bets[key].active && Number(bets[key].amount) > 0) {
-          if (key === color) {
-            const points = Number(bets[key].amount) * payoutInfo[key];
-            winAmount += points;
-            newWins[key] = points;
-          } else {
-            newWins[key] = -Number(bets[key].amount);
-          }
-        } else {
-          newWins[key] = 0;
-        }
-      });
-
-      // Parzyste/Nieparzyste
-      if (bets.even.active && Number(bets.even.amount) > 0) {
-        if (rolledNumber !== 0 && rolledNumber % 2 === 0) {
-          const points = Number(bets.even.amount) * payoutInfo.even;
-          winAmount += points;
-          newWins.even = points;
-        } else {
-          newWins.even = -Number(bets.even.amount);
-        }
-      } else {
-        newWins.even = 0;
-      }
-      if (bets.odd.active && Number(bets.odd.amount) > 0) {
-        if (rolledNumber % 2 === 1) {
-          const points = Number(bets.odd.amount) * payoutInfo.odd;
-          winAmount += points;
-          newWins.odd = points;
-        } else {
-          newWins.odd = -Number(bets.odd.amount);
-        }
-      } else {
-        newWins.odd = 0;
-      }
-
-      // Zakresy
-      if (bets.rangeLow.active && Number(bets.rangeLow.amount) > 0) {
-        if (rolledNumber >= 1 && rolledNumber <= 18) {
-          const points = Number(bets.rangeLow.amount) * payoutInfo.rangeLow;
-          winAmount += points;
-          newWins.rangeLow = points;
-        } else {
-          newWins.rangeLow = -Number(bets.rangeLow.amount);
-        }
-      } else {
-        newWins.rangeLow = 0;
-      }
-      if (bets.rangeHigh.active && Number(bets.rangeHigh.amount) > 0) {
-        if (rolledNumber >= 19 && rolledNumber <= 36) {
-          const points = Number(bets.rangeHigh.amount) * payoutInfo.rangeHigh;
-          winAmount += points;
-          newWins.rangeHigh = points;
-        } else {
-          newWins.rangeHigh = -Number(bets.rangeHigh.amount);
-        }
-      } else {
-        newWins.rangeHigh = 0;
-      }
-
-      // Konkretne liczby - zapisz wyniki dla wszystkich liczb
-      const exactResults = {};
-      rouletteOrder.forEach((n) => {
-        if (n === 0) return;
-        const betAmount = bets.exacts[n] || 0;
-        if (Number(n) === rolledNumber && betAmount > 0) {
-          exactResults[n] = betAmount * 35;
-        } else if (betAmount > 0) {
-          exactResults[n] = -betAmount;
-        } else {
-          exactResults[n] = 0;
-        }
-      });
-
-      const newBalance = balance - totalBet() + winAmount;
-
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (user) {
-        // Wyślij nowe saldo do backendu
-        await fetch('http://localhost:5000/api/update-points', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ email: user.email, points: newBalance }),
-        });
-        // Zaktualizuj localStorage
-        user.points = newBalance;
-        localStorage.setItem('user', JSON.stringify(user));
-      }
-      setBalance(newBalance);
-      setWins(newWins);
-      setMessage(
-        winAmount > 0
-          ? `Wygrałeś ${winAmount} zł! (${rolledNumber} - ${COLORS[color]})`
-          : `Przegrałeś. Wypadło ${rolledNumber} (${COLORS[color]})`
-      );
-      setSpinning(false);
-      setBets(initialBets);
-
-      // ZAPISZ boxy wyników na sztywno
-      setLastResults({
-        red: newWins.red,
-        black: newWins.black,
-        green: newWins.green,
-        even: newWins.even,
-        odd: newWins.odd,
-        rangeLow: newWins.rangeLow,
-        rangeHigh: newWins.rangeHigh,
-        exacts: exactResults, // <-- dodaj wyniki dla wszystkich liczb
-      });
-
-      setTimeout(() => setWins({}), 7000);
-    }, 2800);
-  };
-
   // Custom prostokątny "checkbox" z napisem i kolorem kategorii
   const CustomCheckbox = ({ checked, onChange, colorClass, label }) => (
     <button
@@ -324,14 +229,14 @@ const Roulette = () => {
         Roulette
       </h1>
 
+      {/* Animacja ruletki z wynikiem z backendu */}
+      {/* Animacja ruletki z wynikiem z backendu */}
+      {/* Animacja ruletki z wynikiem z backendu */}
+      
       <RouletteStrip selectedNumber={result?.number ?? 0} spinning={spinning} onEnd={() => {}} />
 
       <button
-        onClick={() => {
-          setWins({});
-          setLastResults(null);
-          handleSpin();
-        }}
+        onClick={handleSpin}
         disabled={spinning}
         className="mt-6 bg-green-600 hover:bg-green-700 text-white px-10 py-2 rounded text-lg transition w-64"
         style={{ fontFamily: "'Montserrat', Arial, sans-serif", ...textShadowStyle }}
@@ -339,7 +244,14 @@ const Roulette = () => {
         {spinning ? "Spinning..." : "Spin"}
       </button>
 
-      {/* Player balance */}
+      {/* Pokazuj komunikaty */}
+      {message && (
+        <div className="mt-2 text-lg font-semibold text-center" style={textShadowStyle}>
+          {message}
+        </div>
+      )}
+
+      {/* Player balance - aktualny stan konta */}
       <div className="mt-4 mb-2 text-2xl font-bold text-center" style={{ fontFamily: "'Montserrat', Arial, sans-serif", ...textShadowStyle }}>
         Balance: <span className="font-bold">{balance} zł</span>
       </div>
