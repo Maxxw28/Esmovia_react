@@ -1,6 +1,3 @@
 [submodule "Users-API"]
 	path = Users-API
 	url = https://github.com/Elteys/Users-API
-[submodule "Crash-API"]
-	path = Crash-API
-	url = https://github.com/remuwson/Crash-API.git
